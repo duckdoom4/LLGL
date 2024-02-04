@@ -42,8 +42,8 @@ class GLFramebuffer
         GLFramebuffer(const GLFramebuffer&) = delete;
         GLFramebuffer& operator = (const GLFramebuffer&) = delete;
 
-        GLFramebuffer(GLFramebuffer&& rhs);
-        GLFramebuffer& operator = (GLFramebuffer&& rhs);
+        GLFramebuffer(GLFramebuffer&& rhs) noexcept;
+        GLFramebuffer& operator = (GLFramebuffer&& rhs) noexcept;
 
         void GenFramebuffer();
         void DeleteFramebuffer();

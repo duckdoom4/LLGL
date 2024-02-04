@@ -75,7 +75,7 @@ class LLGL_EXPORT DynamicArray
         }
 
         //! Takes the ownership of dynamically allocated elements from the \c other array.
-        DynamicArray(DynamicArray&& other) :
+        DynamicArray(DynamicArray&& other) noexcept :
             DynamicArray {}
         {
             operator = (std::forward<DynamicArray&&>(other));
@@ -360,7 +360,7 @@ class LLGL_EXPORT DynamicArray
             return *this;
         }
 
-        DynamicArray& operator = (DynamicArray&& rhs)
+        DynamicArray& operator = (DynamicArray&& rhs) noexcept
         {
             if (&rhs != this)
             {

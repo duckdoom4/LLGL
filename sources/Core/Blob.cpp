@@ -145,13 +145,13 @@ Blob::Blob() :
 {
 }
 
-Blob::Blob(Blob&& rhs) :
+Blob::Blob(Blob&& rhs) noexcept :
     pimpl_ { rhs.pimpl_ }
 {
     rhs.pimpl_ = nullptr;
 }
 
-Blob& Blob::operator = (Blob&& rhs)
+Blob& Blob::operator = (Blob&& rhs) noexcept
 {
     if (this != &rhs)
     {

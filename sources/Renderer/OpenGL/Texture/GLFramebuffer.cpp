@@ -53,13 +53,13 @@ GLFramebuffer::~GLFramebuffer()
     DeleteFramebuffer();
 }
 
-GLFramebuffer::GLFramebuffer(GLFramebuffer&& rhs) :
+GLFramebuffer::GLFramebuffer(GLFramebuffer&& rhs) noexcept :
     id_ { rhs.id_ }
 {
     rhs.id_ = 0;
 }
 
-GLFramebuffer& GLFramebuffer::operator = (GLFramebuffer&& rhs)
+GLFramebuffer& GLFramebuffer::operator = (GLFramebuffer&& rhs) noexcept
 {
     if (id_ != rhs.id_)
     {

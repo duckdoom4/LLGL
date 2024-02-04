@@ -20,13 +20,13 @@ GLRenderbuffer::~GLRenderbuffer()
     DeleteRenderbuffer();
 }
 
-GLRenderbuffer::GLRenderbuffer(GLRenderbuffer&& rhs) :
+GLRenderbuffer::GLRenderbuffer(GLRenderbuffer&& rhs) noexcept :
     id_ { rhs.id_ }
 {
     rhs.id_ = 0;
 }
 
-GLRenderbuffer& GLRenderbuffer::operator = (GLRenderbuffer&& rhs)
+GLRenderbuffer& GLRenderbuffer::operator = (GLRenderbuffer&& rhs) noexcept
 {
     if (id_ != rhs.id_)
     {

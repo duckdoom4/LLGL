@@ -46,7 +46,7 @@ Report::Report(const Report& rhs) :
 {
 }
 
-Report::Report(Report&& rhs) :
+Report::Report(Report&& rhs) noexcept :
     pimpl_ { rhs.pimpl_ }
 {
     rhs.pimpl_ = nullptr;
@@ -141,7 +141,7 @@ Report& Report::operator = (const Report& rhs)
     return *this;
 }
 
-Report& Report::operator = (Report&& rhs)
+Report& Report::operator = (Report&& rhs) noexcept
 {
     if (this != &rhs)
     {

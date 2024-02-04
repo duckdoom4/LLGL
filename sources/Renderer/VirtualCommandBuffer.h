@@ -131,7 +131,7 @@ class VirtualCommandBuffer
         VirtualCommandBuffer& operator = (const VirtualCommandBuffer&) = delete;
 
         // Takes the ownership of the specified virtual command buffer memory.
-        VirtualCommandBuffer(VirtualCommandBuffer&& rhs)
+        VirtualCommandBuffer(VirtualCommandBuffer&& rhs) noexcept
         {
             std::swap(first_, rhs.first_);
             std::swap(current_, rhs.current_);
@@ -139,7 +139,7 @@ class VirtualCommandBuffer
         }
 
         // Takes the ownership of the specified virtual command buffer memory.
-        VirtualCommandBuffer& operator = (VirtualCommandBuffer&& rhs)
+        VirtualCommandBuffer& operator = (VirtualCommandBuffer&& rhs) noexcept
         {
             std::swap(first_, rhs.first_);
             std::swap(current_, rhs.current_);

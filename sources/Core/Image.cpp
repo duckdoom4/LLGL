@@ -49,7 +49,7 @@ Image::Image(const Image& rhs) :
     ::memcpy(data_.get(), rhs.data_.get(), rhs.GetDataSize());
 }
 
-Image::Image(Image&& rhs) :
+Image::Image(Image&& rhs) noexcept :
     extent_   { rhs.extent_          },
     format_   { rhs.format_          },
     dataType_ { rhs.dataType_        },
@@ -70,7 +70,7 @@ Image& Image::operator = (const Image& rhs)
     return *this;
 }
 
-Image& Image::operator = (Image&& rhs)
+Image& Image::operator = (Image&& rhs) noexcept
 {
     Reset(rhs.GetExtent(), rhs.GetFormat(), rhs.GetDataType(), std::move(rhs.data_));
     rhs.ResetAttributes();

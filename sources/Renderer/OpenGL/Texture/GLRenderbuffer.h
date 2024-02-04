@@ -28,8 +28,8 @@ class GLRenderbuffer
         GLRenderbuffer(const GLRenderbuffer&) = delete;
         GLRenderbuffer& operator = (const GLRenderbuffer&) = delete;
 
-        GLRenderbuffer(GLRenderbuffer&& rhs);
-        GLRenderbuffer& operator = (GLRenderbuffer&& rhs);
+        GLRenderbuffer(GLRenderbuffer&& rhs) noexcept;
+        GLRenderbuffer& operator = (GLRenderbuffer&& rhs) noexcept;
 
         void GenRenderbuffer();
         void DeleteRenderbuffer();
