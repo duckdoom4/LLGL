@@ -130,7 +130,7 @@ class LLGL_EXPORT RenderSystem : public Interface
     public:
 
         //! Releases the internal data.
-        ~RenderSystem();
+        ~RenderSystem() override;
 
         /* ----- Common ----- */
 

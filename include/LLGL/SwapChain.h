@@ -47,7 +47,7 @@ class LLGL_EXPORT SwapChain : public RenderTarget
     public:
 
         //! Release the internal data.
-        ~SwapChain();
+        ~SwapChain() override;
 
         /* ----- Render Target ----- */
 

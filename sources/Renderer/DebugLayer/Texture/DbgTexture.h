@@ -33,7 +33,7 @@ class DbgTexture final : public Texture
 
         DbgTexture(Texture& instance, const TextureDescriptor& desc);
         //DbgTexture(Texture& instance, DbgTexture* sharedTexture, const TextureViewDescriptor& desc);
-        ~DbgTexture();
+        ~DbgTexture() override;
 
     public:
 

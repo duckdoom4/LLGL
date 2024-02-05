@@ -29,7 +29,7 @@ class LLGL_EXPORT Sampler : public Resource
     public:
 
         //! Returns ResourceType::Sampler.
-        ResourceType GetResourceType() const override final;
+        ResourceType GetResourceType() const final;
 
     protected:
 

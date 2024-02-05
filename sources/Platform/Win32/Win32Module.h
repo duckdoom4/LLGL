@@ -23,7 +23,7 @@ class Win32Module final : public Module
     public:
 
         Win32Module(const char* moduleFileanme, Report* report = nullptr);
-        ~Win32Module();
+        ~Win32Module() override;
 
         void* LoadProcedure(const char* procedureName) override;
 

@@ -72,7 +72,7 @@ class LLGL_EXPORT Canvas : public Surface
     public:
 
         //! Releases the internal data.
-        ~Canvas();
+        ~Canvas() override;
 
         /* --- Common --- */
 
@@ -103,7 +103,7 @@ class LLGL_EXPORT Canvas : public Surface
         bool AdaptForVideoMode(Extent2D* resolution, bool* fullscreen) override;
 
         //! Always returns Display::GetPrimary.
-        Display* FindResidentDisplay() const override final;
+        Display* FindResidentDisplay() const final;
 
     public:
 

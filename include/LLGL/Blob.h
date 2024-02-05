@@ -50,7 +50,7 @@ class LLGL_EXPORT Blob : public NonCopyable
         Blob(const void* data, std::size_t size, bool isWeakRef = false);
 
         //! Deletes the internal memory blob.
-        ~Blob();
+        ~Blob() override;
 
     public:
 

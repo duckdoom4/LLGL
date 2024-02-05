@@ -23,7 +23,7 @@ class Win32Window final : public Window
     public:
 
         Win32Window(const WindowDescriptor& desc);
-        ~Win32Window();
+        ~Win32Window() override;
 
         bool GetNativeHandle(void* nativeHandle, std::size_t nativeHandleSize) override;
 

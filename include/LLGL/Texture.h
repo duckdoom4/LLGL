@@ -34,7 +34,7 @@ class LLGL_EXPORT Texture : public Resource
     public:
 
         //! Returns ResourceType::Texture.
-        ResourceType GetResourceType() const override final;
+        ResourceType GetResourceType() const final;
 
         //! Returns the type of this texture.
         inline TextureType GetType() const

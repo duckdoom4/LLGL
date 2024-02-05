@@ -32,7 +32,7 @@ class DbgPipelineState final : public PipelineState
 
         DbgPipelineState(PipelineState& instance, const GraphicsPipelineDescriptor& desc);
         DbgPipelineState(PipelineState& instance, const ComputePipelineDescriptor& desc);
-        ~DbgPipelineState();
+        ~DbgPipelineState() override;
 
         // Returns true if this PSO has a dynamic blend factor, i.e. BlendDescriptor::blendFactorDynamic is effectively enabled.
         bool HasDynamicBlendFactor() const;
