@@ -155,7 +155,7 @@ Display* Window::FindResidentDisplay() const
     const auto winSize  = GetSize();
     const auto winArea  = static_cast<int>(winSize.width * winSize.height);
 
-    for (auto displayList = Display::GetList(); auto display = *displayList; ++displayList)
+    for (auto display : Display::GetList())
     {
         auto offset = display->GetOffset();
         auto extent = display->GetDisplayMode().resolution;

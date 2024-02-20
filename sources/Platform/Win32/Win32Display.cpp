@@ -160,18 +160,17 @@ std::size_t Display::Count()
     return g_displayList.size();
 }
 
-Display* const * Display::GetList()
+std::span<Display* const> Display::GetList()
 {
-    if (UpdateDisplayList() || g_displayRefList.empty())
+    if (UpdateDisplayList() || g_displayList.size() != g_displayRefList.size())
     {
-        /* Update reference list and append null terminator to array */
+        /* Update reference list */
         g_displayRefList.clear();
-        g_displayRefList.reserve(g_displayList.size() + 1);
+        g_displayRefList.reserve(g_displayList.size());
         for (const auto& entry : g_displayList)
             g_displayRefList.push_back(entry.display.get());
-        g_displayRefList.push_back(nullptr);
     }
-    return g_displayRefList.data();
+    return g_displayRefList;
 }
 
 Display* Display::Get(std::size_t index)

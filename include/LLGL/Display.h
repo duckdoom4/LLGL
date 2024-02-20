@@ -13,6 +13,7 @@
 #include <LLGL/DisplayFlags.h>
 #include <LLGL/Container/Strings.h>
 #include <vector>
+#include <span>
 
 
 namespace LLGL
@@ -56,7 +57,7 @@ class LLGL_EXPORT Display : public Interface
         \remarks This function always checks for updates in the display list.
         \see Count
         */
-        static Display* const * GetList();
+        static std::span<Display* const> GetList();
 
         /**
         \brief Returns the specified display or null if the index is out of bounds.

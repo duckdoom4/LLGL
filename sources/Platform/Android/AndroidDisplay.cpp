@@ -19,7 +19,7 @@ std::size_t Display::Count()
     return 1;
 }
 
-Display* const * Display::GetList()
+std::span<Display* const> Display::GetList()
 {
     static Display* displayList[] = { GetPrimary(), nullptr };
     return displayList;
