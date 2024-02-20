@@ -12,6 +12,7 @@
 #include <LLGL/Export.h>
 #include <LLGL/Container/UTF8String.h>
 #include <string>
+#include <filesystem>
 
 
 namespace LLGL
@@ -23,22 +24,32 @@ namespace Path
 
 
 // Returns the platform specific path separator, i.e. either '\\' on Windows or '/' on all other platforms.
-LLGL_EXPORT char GetSeparator();
+LLGL_EXPORT constexpr char GetSeparator() {
+    return std::filesystem::path::preferred_separator;
+}
 
 // Sanitizes the specified path:
 //  - Replaces wrong separators with the appropriate one for the host platform.
 //  - Replaces redundant upper-level directory entries, e.g. "Foo/../Bar/" to "Bar".
 //  - Strips trailing separators.
-LLGL_EXPORT UTF8String Sanitize(const UTF8String& path);
+LLGL_EXPORT constexpr UTF8String Sanitize(const UTF8String& path) {
+    return std::filesystem::path(path.c_str()).c_str();
+}
 
 // Combines the two specified paths. Trailing '\\' and '/' characters will be stripped.
-LLGL_EXPORT UTF8String Combine(const UTF8String& lhs, const UTF8String& rhs);
+LLGL_EXPORT constexpr UTF8String Combine(const UTF8String& lhs, const UTF8String& rhs) {
+    return (std::filesystem::path(lhs.c_str()) / std::filesystem::path(rhs.c_str())).c_str();
+}
 
 // Returns the current working directory for the active process.
-LLGL_EXPORT UTF8String GetWorkingDir();
+LLGL_EXPORT constexpr UTF8String GetWorkingDir() {
+    return std::filesystem::current_path().c_str();
+}
 
 // Returns the input filename as absolute path.
-LLGL_EXPORT UTF8String GetAbsolutePath(const UTF8String& filename);
+LLGL_EXPORT constexpr UTF8String GetAbsolutePath(const UTF8String& filename) {
+    return std::filesystem::absolute(filename.c_str()).c_str();
+}
 
 
 } // /nameapace Path
