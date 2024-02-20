@@ -12,7 +12,6 @@
 #include <LLGL/CanvasFlags.h>
 #include <LLGL/Surface.h>
 #include <LLGL/Types.h>
-#include <LLGL/Key.h>
 #include <memory>
 
 
