@@ -43,59 +43,18 @@ class LLGL_EXPORT Display : public Interface
         LLGL_DECLARE_INTERFACE( InterfaceID::Display );
 
     public:
-
-        /**
-        \brief Returns the number of available displays.
-        \remarks This function always checks for updates in the display list.
-        \see Get
-        */
-        static std::size_t Count();
-
         /**
         \brief Returns a null-terminated array of all displays.
-        \return Pointer to an array of Display pointers with Count()+1 elements and the last element being null.
+        \return A span of all displays.
         \remarks This function always checks for updates in the display list.
-        \see Count
         */
         static std::span<Display* const> GetList();
-
-        /**
-        \brief Returns the specified display or null if the index is out of bounds.
-        \param[in] index Specifies the zero-based index for the display to be returned.
-        This should be in the half-open range [0, Count) or null will be returned.
-        \remarks This function always checks for updates in the display list.
-        \see Count
-        \see GetPrimary
-        */
-        static Display* Get(std::size_t index);
 
         /**
         \brief Returns the primary display or null if no display can be found.
         \see Get
         */
         static Display* GetPrimary();
-
-        /**
-        \brief Shows or hides the cursor for the running application from all displays.
-        \param[in] show Specifies whether to show or hide the cursor.
-        \remarks In contrast to the Win32 API, this function only shows or hides the cursor,
-        while the Win32 API function with the same name either increments or decrements an internal visibility counter for the cursor.
-        \return True on success, otherwise cursor visibility changes are not supported.
-        \see IsCursorShown
-        */
-        static bool ShowCursor(bool show);
-
-        /**
-        \brief Returns true if the cursor is currently being shown on any display.
-        \see ShowCursor
-        */
-        static bool IsCursorShown();
-
-        //! Sets the cursor to the specified screen coordinate and returns true on success. Otherwise, cursor relocation is not supported.
-        static bool SetCursorPosition(const Offset2D& position);
-
-        //! Returns the screen coordiante of the cursor.
-        static Offset2D GetCursorPosition();
 
     public:
 

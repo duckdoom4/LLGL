@@ -13,21 +13,10 @@
 namespace LLGL
 {
 
-
-std::size_t Display::Count()
-{
-    return 1;
-}
-
 std::span<Display* const> Display::GetList()
 {
     static Display* displayList[] = { GetPrimary(), nullptr };
     return displayList;
-}
-
-Display* Display::Get(std::size_t index)
-{
-    return (index == 0 ? GetPrimary() : nullptr);
 }
 
 Display* Display::GetPrimary()
@@ -35,27 +24,6 @@ Display* Display::GetPrimary()
     static std::unique_ptr<Display> primaryDisplay = MakeUnique<AndroidDisplay>();
     return primaryDisplay.get();
 }
-
-bool Display::ShowCursor(bool show)
-{
-    return false;
-}
-
-bool Display::IsCursorShown()
-{
-    return false;
-}
-
-bool Display::SetCursorPosition(const Offset2D& position)
-{
-    return false;
-}
-
-Offset2D Display::GetCursorPosition()
-{
-    return { 0, 0 };
-}
-
 
 /*
  * AndroidDisplay class

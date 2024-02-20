@@ -154,12 +154,6 @@ static bool IsCursorVisible(bool& visible)
  * Display class
  */
 
-std::size_t Display::Count()
-{
-    UpdateDisplayList();
-    return g_displayList.size();
-}
-
 std::span<Display* const> Display::GetList()
 {
     if (UpdateDisplayList() || g_displayList.size() != g_displayRefList.size())
@@ -173,59 +167,11 @@ std::span<Display* const> Display::GetList()
     return g_displayRefList;
 }
 
-Display* Display::Get(std::size_t index)
-{
-    UpdateDisplayList();
-    return (index < g_displayList.size() ? g_displayList[index].display.get() : nullptr);
-}
-
 Display* Display::GetPrimary()
 {
     UpdateDisplayList();
     return g_primaryDisplay;
 }
-
-bool Display::ShowCursor(bool show)
-{
-    bool visible = false;
-    if (IsCursorVisible(visible))
-    {
-        if (visible)
-        {
-            if (!show)
-                ::ShowCursor(FALSE);
-        }
-        else
-        {
-            if (show)
-                ::ShowCursor(TRUE);
-        }
-        return true;
-    }
-    return false;
-}
-
-bool Display::IsCursorShown()
-{
-    bool visible = true;
-    IsCursorVisible(visible);
-    return visible;
-}
-
-bool Display::SetCursorPosition(const Offset2D& position)
-{
-    return (::SetCursorPos(position.x, position.y) != FALSE);
-}
-
-Offset2D Display::GetCursorPosition()
-{
-    POINT pos;
-    if (::GetCursorPos(&pos) != FALSE)
-        return { pos.x, pos.y };
-    else
-        return { 0, 0 };
-}
-
 
 /*
  * Win32Display class

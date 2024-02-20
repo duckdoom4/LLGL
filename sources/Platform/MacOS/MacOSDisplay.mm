@@ -118,13 +118,6 @@ static bool UpdateDisplayList()
  * Display class
  */
 
-std::size_t Display::Count()
-{
-    std::uint32_t numDisplays = 0;
-    CGGetActiveDisplayList(g_maxNumDisplays, nullptr, &numDisplays);
-    return numDisplays;
-}
-
 std::span<Display* const> Display::GetList()
 {
     if (UpdateDisplayList() || g_displayList.size() != g_displayRefList.size())
@@ -138,113 +131,11 @@ std::span<Display* const> Display::GetList()
     return g_displayRefList;
 }
 
-Display* Display::Get(std::size_t index)
-{
-    UpdateDisplayList();
-    return (index < g_displayList.size() ? g_displayList[index].get() : nullptr);
-}
-
 Display* Display::GetPrimary()
 {
     UpdateDisplayList();
     return g_primaryDisplay;
 }
-
-static bool g_cursorVisible = true;
-
-bool Display::ShowCursor(bool show)
-{
-    if (g_cursorVisible != show)
-    {
-        if (show)
-            [NSCursor unhide];
-        else
-            [NSCursor hide];
-        g_cursorVisible = show;
-    }
-    return true;
-}
-
-bool Display::IsCursorShown()
-{
-    return g_cursorVisible;
-}
-
-// Singleton for the custom NSCursor.
-class MacOSCustomNSCursor
-{
-
-    public:
-
-        ~MacOSCustomNSCursor();
-
-        static void SetHotSpot(const NSPoint& hotSpot);
-
-    private:
-
-        MacOSCustomNSCursor() = default;
-
-        void MakeNewNSCursor(NSImage* image, NSPoint hotSpot);
-
-    private:
-
-        NSCursor* cursor_ = nullptr;
-
-};
-
-MacOSCustomNSCursor::~MacOSCustomNSCursor()
-{
-    if (cursor_ != nullptr)
-        [cursor_ release];
-}
-
-void MacOSCustomNSCursor::SetHotSpot(const NSPoint &hotSpot)
-{
-    static MacOSCustomNSCursor instance;
-    if (NSCursor* oldCursor = [NSCursor currentSystemCursor])
-        instance.MakeNewNSCursor([oldCursor image], hotSpot);
-}
-
-void MacOSCustomNSCursor::MakeNewNSCursor(NSImage* image, NSPoint hotSpot)
-{
-    if (cursor_ != nullptr)
-        [cursor_ release];
-    cursor_ = [[NSCursor alloc] initWithImage:image hotSpot:hotSpot];
-    [cursor_ set];
-}
-
-bool Display::SetCursorPosition(const Offset2D& position)
-{
-    /*
-    NSCursor API doesn't allow to change the cursor position,
-    so we create a new cursor at the requested location and make it the new cursor.
-    */
-    NSPoint newHotSpot = NSMakePoint(
-        static_cast<CGFloat>(position.x),
-        static_cast<CGFloat>(position.y)
-    );
-    MacOSCustomNSCursor::SetHotSpot(newHotSpot);
-    return true;
-}
-
-Offset2D Display::GetCursorPosition()
-{
-    /*
-    Return 'hot spot' of current system cursor as primary cursor position.
-    This will return a value whether the cursor is hidden or visible.
-    */
-    if (NSCursor* cursor = [NSCursor currentSystemCursor])
-    {
-        NSPoint hotSpot = [cursor hotSpot];
-        return Offset2D
-        {
-            static_cast<std::int32_t>(hotSpot.x),
-            static_cast<std::int32_t>(hotSpot.y)
-        };
-    }
-    return { 0, 0 };
-}
-
 
 /*
  * MacOSDisplay class

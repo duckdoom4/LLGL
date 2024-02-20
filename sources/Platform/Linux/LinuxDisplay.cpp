@@ -66,12 +66,6 @@ LinuxSharedX11Display::~LinuxSharedX11Display()
  * Display class
  */
 
-std::size_t Display::Count()
-{
-    UpdateDisplayList();
-    return g_displayList.size();
-}
-
 std::span<Display* const> Display::GetList()
 {
     if (UpdateDisplayList() || g_displayList.size() != g_displayRefList.size())
@@ -85,73 +79,11 @@ std::span<Display* const> Display::GetList()
     return g_displayRefList;
 }
 
-Display* Display::Get(std::size_t index)
-{
-    UpdateDisplayList();
-    return (index < g_displayList.size() ? g_displayList[index].get() : nullptr);
-}
-
 Display* Display::GetPrimary()
 {
     UpdateDisplayList();
     return g_primaryDisplay;
 }
-
-bool Display::ShowCursor(bool show)
-{
-    //TODO
-    return false;
-}
-
-bool Display::IsCursorShown()
-{
-    //TODO
-    return true;
-}
-
-bool Display::SetCursorPosition(const Offset2D& position)
-{
-    LinuxSharedX11DisplaySPtr sharedX11Display = LinuxSharedX11Display::GetShared();
-    ::Display* dpy = sharedX11Display->GetNative();
-    Window rootWnd = DefaultRootWindow(dpy);
-    XWarpPointer(
-        /*display*/     dpy,
-        /*src_w*/       None,
-        /*dest_w*/      rootWnd,
-        /*src_x*/       0,
-        /*src_y*/       0,
-        /*src_width*/   0,
-        /*src_height*/  0,
-        /*dest_x*/      position.x,
-        /*dest_y*/      position.y
-    );
-    XFlush(dpy);
-    return true;
-}
-
-Offset2D Display::GetCursorPosition()
-{
-    LinuxSharedX11DisplaySPtr sharedX11Display = LinuxSharedX11Display::GetShared();
-    ::Display* dpy = sharedX11Display->GetNative();
-    Window rootWnd = DefaultRootWindow(dpy);
-    Window rootWndReturn, childWndReturn;
-    unsigned int mask;
-    Offset2D rootPosition = { 0, 0 };
-    Offset2D childPosition = { 0, 0 };
-    XQueryPointer(
-        /*display*/         dpy,
-        /*w*/               rootWnd,
-        /*root_return*/     &rootWndReturn,
-        /*child_return*/    &childWndReturn,
-        /*root_x_return*/   &rootPosition.x,
-        /*root_y_return*/   &rootPosition.y,
-        /*win_x_return*/    &childPosition.x,
-        /*win_y_return*/    &childPosition.y,
-        /*mask_return*/     &mask
-    );
-    return rootPosition;
-}
-
 
 /*
  * LinuxDisplay class
