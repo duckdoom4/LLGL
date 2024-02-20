@@ -316,6 +316,63 @@ Format Unmap(const DXGI_FORMAT format)
     }
 }
 
+#define MatrixColUnmap(_type, cols)                  \
+    switch (Rows) {                                  \
+        case 2: return UniformType::_type##cols##x2; \
+        case 3: return UniformType::_type##cols##x3; \
+        case 4: return UniformType::_type##cols##x4; \
+        default: break;                              \
+    }
+
+#define VectorScalarCase(_type)               \
+    case D3D_SVC_SCALAR:                      \
+        return UniformType::_type##1;         \
+    case D3D_SVC_VECTOR:                      \
+    switch (Columns) {                        \
+        case 2: return UniformType::_type##2; \
+        case 3: return UniformType::_type##3; \
+        case 4: return UniformType::_type##4; \
+        default: break;                       \
+    }                                         \
+    break;
+
+#define ClassUnmap(_type)                                     \
+    switch (variableClass) {                                  \
+        VectorScalarCase(_type)                               \
+        case D3D_SVC_MATRIX_ROWS:                             \
+        case D3D_SVC_MATRIX_COLUMNS:                          \
+            switch (Columns) {                                \
+                case 2: MatrixColUnmap(_type, 2); break;      \
+                case 3: MatrixColUnmap(_type, 3); break;      \
+                case 4: MatrixColUnmap(_type, 4); break;      \
+                default: break;                               \
+            }                                                 \
+            break;                                            \
+        default: break;                                       \
+    }
+
+#define ClassUnmapVec(_type)    \
+    switch (variableClass) {    \
+        VectorScalarCase(_type) \
+    }
+
+UniformType Unmap(const D3D_SHADER_VARIABLE_TYPE variableType, const D3D_SHADER_VARIABLE_CLASS variableClass, UINT Columns, UINT Rows) {
+    switch (variableType) {
+        case D3D_SVT_BOOL: ClassUnmapVec(Bool); break;
+        case D3D_SVT_INT: ClassUnmapVec(Int); break;
+        case D3D_SVT_UINT: ClassUnmapVec(UInt); break;
+        case D3D_SVT_FLOAT: ClassUnmap(Float); break;
+        case D3D_SVT_DOUBLE: ClassUnmap(Double); break;
+        default: return UniformType::Undefined;
+    }
+    return UniformType::Undefined;
+}
+
+#undef ClassUnmap
+#undef ClassUnmapVec
+#undef MatrixColUnmap
+#undef VectorScalarCase
+
 StorageBufferType Unmap(const D3D_SHADER_INPUT_TYPE inputType)
 {
     switch (inputType)

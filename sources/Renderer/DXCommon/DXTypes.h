@@ -65,6 +65,7 @@ D3D_PRIMITIVE_TOPOLOGY  ToD3DPrimitiveTopology(const PrimitiveTopology topology)
 
 Format                  Unmap( const DXGI_FORMAT            format    );
 StorageBufferType       Unmap( const D3D_SHADER_INPUT_TYPE  inputType );
+UniformType             Unmap( const D3D_SHADER_VARIABLE_TYPE variableType, const D3D_SHADER_VARIABLE_CLASS variableClass, UINT Columns, UINT Rows );
 SystemValue             Unmap( const D3D_NAME               name      );
 ResourceType            Unmap( const D3D_SRV_DIMENSION      dimension );
 
