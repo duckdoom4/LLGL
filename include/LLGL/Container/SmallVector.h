@@ -139,17 +139,17 @@ class LLGL_EXPORT SmallVector
     public:
 
         //! Default initializes an empty vector.
-        SmallVector() :
+        constexpr SmallVector() :
             local_ {               },
             data_  { local_.data() }
         {
             /* If local capacity is 0, initialize capacity last so it becomes the active union member */
-            if (LocalCapacity == 0)
+            if constexpr (LocalCapacity == 0)
                 cap_ = 0;
         }
 
         //! Initializes the vector with a copy of all elements from the \c other vector.
-        SmallVector(const SmallVector& other) :
+        constexpr SmallVector(const SmallVector& other) :
             SmallVector {}
         {
             operator = (other);
@@ -163,14 +163,14 @@ class LLGL_EXPORT SmallVector
             typename    OtherAllocator,
             typename    OtherGrowStrategy
         >
-        SmallVector(const SmallVector<OtherT, OtherLocalCapacity, OtherAllocator, OtherGrowStrategy>& other) :
+        constexpr SmallVector(const SmallVector<OtherT, OtherLocalCapacity, OtherAllocator, OtherGrowStrategy>& other) :
             SmallVector {}
         {
             operator = (other);
         }
 
         //! Takes the ownership of dynamically allocated elements from the \c other vector or copies all elements if the dynamic allocation is not used yet.
-        SmallVector(SmallVector&& other) noexcept :
+        constexpr SmallVector(SmallVector&& other) noexcept :
             SmallVector {}
         {
             operator = (std::forward<SmallVector&&>(other));
@@ -178,14 +178,14 @@ class LLGL_EXPORT SmallVector
 
         //! Initializes the vector with the specified elements in the half-open range <code>[from, to)</code>.
         template <typename InputIter>
-        SmallVector(InputIter from, InputIter to) :
+        constexpr SmallVector(InputIter from, InputIter to) :
             SmallVector {}
         {
             insert(end(), from, to);
         }
 
         //! Initializes the vector with a copy of all elements from the specified initializer list.
-        SmallVector(const std::initializer_list<T>& list) :
+        constexpr SmallVector(const std::initializer_list<T>& list) :
             SmallVector {}
         {
             insert(end(), list);
@@ -193,27 +193,27 @@ class LLGL_EXPORT SmallVector
 
         //! Initializes the vector with a copy of all elements from the \c other generic container.
         template <template <typename, typename> class OtherContainer, typename OtherAllocator>
-        SmallVector(const OtherContainer<T, OtherAllocator>& other) :
+        constexpr SmallVector(const OtherContainer<T, OtherAllocator>& other) :
             SmallVector { other.begin(), other.end() }
         {
         }
 
         //! Initializes the vector with the specified number of elements and initial default value.
-        explicit SmallVector(size_type count) :
+        constexpr explicit SmallVector(size_type count) :
             SmallVector {}
         {
             resize(count);
         }
 
         //! Initializes the vector with the specified number of elements and initial value.
-        explicit SmallVector(size_type count, const value_type& value) :
+        constexpr explicit SmallVector(size_type count, const value_type& value) :
             SmallVector {}
         {
             resize(count, value);
         }
 
         //! Destroys all elements in this vector.
-        ~SmallVector()
+        constexpr ~SmallVector()
         {
             release();
         }
@@ -221,31 +221,31 @@ class LLGL_EXPORT SmallVector
     public:
 
         //! Returns true if this vector is empty.
-        bool empty() const noexcept
+        constexpr bool empty() const noexcept
         {
             return (size_ == 0);
         }
 
         //! Returns the size (in number of elements) of this vector.
-        size_type size() const noexcept
+        constexpr size_type size() const noexcept
         {
             return size_;
         }
 
         //! Returns the internal capacity (in number of elements) of this vector. This refers to the memory allocated for this vector.
-        size_type capacity() const noexcept
+        constexpr size_type capacity() const noexcept
         {
             return (is_dynamic() ? cap_ : LocalCapacity);
         }
 
         //! Returns a pointer to the beginning of this vector.
-        pointer data() noexcept
+        constexpr pointer data() noexcept
         {
             return data_;
         }
 
         //! Returns a constant pointer to the beginning of this vector.
-        const_pointer data() const noexcept
+        constexpr const_pointer data() const noexcept
         {
             return data_;
         }
@@ -256,7 +256,7 @@ class LLGL_EXPORT SmallVector
         \brief Returns a reference to the element at the specified position in this vector.
         \remarks This must \e not be called on an empty vector!
         */
-        reference at(size_type pos)
+        constexpr reference at(size_type pos)
         {
             return data_[pos];
         }
@@ -265,7 +265,7 @@ class LLGL_EXPORT SmallVector
         \brief Returns a constant reference to the element at the specified position in this vector.
         \remarks This must \e not be called on an empty vector!
         */
-        const_reference at(size_type pos) const
+        constexpr const_reference at(size_type pos) const
         {
             return data_[pos];
         }
@@ -274,7 +274,7 @@ class LLGL_EXPORT SmallVector
         \brief Returns a reference to first element in this vector.
         \remarks This must \e not be called on an empty vector!
         */
-        reference front()
+        constexpr reference front()
         {
             return data_[0];
         }
@@ -283,7 +283,7 @@ class LLGL_EXPORT SmallVector
         \brief Returns a constant reference to first element in this vector.
         \remarks This must \e not be called on an empty vector!
         */
-        const_reference front() const
+        constexpr const_reference front() const
         {
             return data_[0];
         }
@@ -292,7 +292,7 @@ class LLGL_EXPORT SmallVector
         \brief Returns a reference to last element in this vector.
         \remarks This must \e not be called on an empty vector!
         */
-        reference back()
+        constexpr reference back()
         {
             return data_[size_ - 1];
         }
@@ -301,7 +301,7 @@ class LLGL_EXPORT SmallVector
         \brief Returns a constant reference to last element in this vector.
         \remarks This must \e not be called on an empty vector!
         */
-        const_reference back() const
+        constexpr const_reference back() const
         {
             return data_[size_ - 1];
         }
@@ -312,7 +312,7 @@ class LLGL_EXPORT SmallVector
         \brief Destroys all elements in this vector.
         \remarks After this call, \c size() returns 0 but \c capacity() is unchanged.
         */
-        void clear()
+        constexpr void clear()
         {
             destroy_range(begin(), end());
             size_ = 0;
@@ -324,7 +324,7 @@ class LLGL_EXPORT SmallVector
         \remarks After this call, \c size() returns the same value as the input parameter \c size.
         \see resize(size_type, const value_type&)
         */
-        void resize(size_type size)
+        constexpr void resize(size_type size)
         {
             resize(size, value_type{});
         }
@@ -336,7 +336,7 @@ class LLGL_EXPORT SmallVector
         \remarks After this call, \c size() returns the same value as the input parameter \c size.
         \see resize(size_type)
         */
-        void resize(size_type size, const value_type& value)
+        constexpr void resize(size_type size, const value_type& value)
         {
             if (size_ < size)
             {
@@ -357,7 +357,7 @@ class LLGL_EXPORT SmallVector
         If the new size is smaller than or equal to the current capacity, this function has no effect.
         \remarks After this call, \c capacity() returns a value that is greater than or equal to the input parameter \c size.
         */
-        void reserve(size_type size)
+        constexpr void reserve(size_type size)
         {
             if (capacity() < size)
                 realloc(GrowStrategy::Grow(size));
@@ -367,13 +367,13 @@ class LLGL_EXPORT SmallVector
         \brief Re-allocates the internal memory for this vector to fit precisely the current number of elements.
         \remarks After this call, \c capacity() returns the same value as \c size().
         */
-        void shrink_to_fit()
+        constexpr void shrink_to_fit()
         {
             if (size_ < capacity())
                 realloc();
         }
 
-        void push_back(const value_type& value)
+        constexpr void push_back(const value_type& value)
         {
             if (size_ == capacity())
                 realloc(GrowStrategy::Grow(size_ + 1));
@@ -382,7 +382,7 @@ class LLGL_EXPORT SmallVector
             ++size_;
         }
 
-        void push_back(value_type&& value)
+        constexpr void push_back(value_type&& value)
         {
             reserve(size() + 1);
             Allocator alloc;
@@ -390,7 +390,7 @@ class LLGL_EXPORT SmallVector
             ++size_;
         }
 
-        void pop_back()
+        constexpr void pop_back()
         {
             if (size_ > 0)
             {
@@ -400,14 +400,14 @@ class LLGL_EXPORT SmallVector
             }
         }
 
-        iterator insert(const_iterator pos, const value_type& value)
+        constexpr iterator insert(const_iterator pos, const value_type& value)
         {
             const_pointer p = &value;
             return insert(pos, p, p + 1);
         }
 
         template <typename InputIter>
-        iterator insert(const_iterator pos, InputIter from, InputIter to)
+        constexpr iterator insert(const_iterator pos, InputIter from, InputIter to)
         {
             if (from < to)
             {
@@ -437,17 +437,17 @@ class LLGL_EXPORT SmallVector
             return const_cast<iterator>(pos);
         }
 
-        iterator insert(const_iterator pos, const std::initializer_list<T>& list)
+        constexpr iterator insert(const_iterator pos, const std::initializer_list<T>& list)
         {
             return insert(pos, list.begin(), list.end());
         }
 
-        iterator erase(const_iterator pos)
+        constexpr iterator erase(const_iterator pos)
         {
             return erase(pos, pos + 1);
         }
 
-        iterator erase(const_iterator from, const_iterator to)
+        constexpr iterator erase(const_iterator from, const_iterator to)
         {
             if (from < to && from < end() && to >= begin())
             {
@@ -471,7 +471,7 @@ class LLGL_EXPORT SmallVector
             return end();
         }
 
-        void swap(SmallVector& other)
+        constexpr void swap(SmallVector& other)
         {
             if (is_dynamic() && other.is_dynamic())
             {
@@ -510,69 +510,69 @@ class LLGL_EXPORT SmallVector
 
     public:
 
-        iterator begin() noexcept
+        constexpr iterator begin() noexcept
         {
             return data_;
         }
 
-        const_iterator begin() const noexcept
+        constexpr const_iterator begin() const noexcept
         {
             return data_;
         }
 
-        const_iterator cbegin() const noexcept
+        constexpr const_iterator cbegin() const noexcept
         {
             return data_;
         }
 
-        reverse_iterator rbegin()
+        constexpr reverse_iterator rbegin()
         {
             return reverse_iterator{ end() };
         }
 
-        const_reverse_iterator rbegin() const
+        constexpr const_reverse_iterator rbegin() const
         {
             return const_reverse_iterator{ end() };
         }
 
-        const_reverse_iterator crbegin() const
+        constexpr const_reverse_iterator crbegin() const
         {
             return const_reverse_iterator{ cend() };
         }
 
-        iterator end() noexcept
+        constexpr iterator end() noexcept
         {
             return data_ + size_;
         }
 
-        const_iterator end() const noexcept
+        constexpr const_iterator end() const noexcept
         {
             return data_ + size_;
         }
 
-        const_iterator cend() const noexcept
+        constexpr const_iterator cend() const noexcept
         {
             return data_ + size_;
         }
 
-        reverse_iterator rend()
+        constexpr reverse_iterator rend()
         {
             return reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator rend() const
+        constexpr const_reverse_iterator rend() const
         {
             return const_reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator crend() const
+        constexpr const_reverse_iterator crend() const
         {
             return const_reverse_iterator{ cbegin() };
         }
 
     public:
 
-        SmallVector& operator = (const SmallVector& rhs)
+        constexpr SmallVector& operator = (const SmallVector& rhs)
         {
             clear();
             insert(end(), rhs.begin(), rhs.end());
@@ -586,14 +586,14 @@ class LLGL_EXPORT SmallVector
             typename    OtherAllocator,
             typename    OtherGrowStrategy
         >
-        SmallVector& operator = (const SmallVector<OtherT, OtherLocalCapacity, OtherAllocator, OtherGrowStrategy>& rhs)
+            constexpr SmallVector& operator = (const SmallVector<OtherT, OtherLocalCapacity, OtherAllocator, OtherGrowStrategy>& rhs)
         {
             clear();
             insert(end(), rhs.begin(), rhs.end());
             return *this;
         }
 
-        SmallVector& operator = (SmallVector&& rhs) noexcept
+        constexpr SmallVector& operator = (SmallVector&& rhs) noexcept
         {
             if (&rhs != this)
             {
@@ -624,24 +624,24 @@ class LLGL_EXPORT SmallVector
             return *this;
         }
 
-        const_reference operator [] (size_type pos) const
+        constexpr const_reference operator [] (size_type pos) const
         {
             return data_[pos];
         }
 
-        reference operator [] (size_type pos)
+        constexpr reference operator [] (size_type pos)
         {
             return data_[pos];
         }
 
-        operator ArrayView<T> () const
+        constexpr operator ArrayView<T> () const
         {
             return ArrayView<T>{ data(), size() };
         }
 
     private:
 
-        static void swap_dynamic_from_static(SmallVector& dynamicVector, SmallVector& staticVector)
+        constexpr static void swap_dynamic_from_static(SmallVector& dynamicVector, SmallVector& staticVector)
         {
             /* Store copy of dynamic capacity as that container will get an implied capacity after swap (LocalCapacity) */
             const size_type dynamicCap = dynamicVector.cap_;
@@ -658,7 +658,7 @@ class LLGL_EXPORT SmallVector
 
     private:
 
-        void destroy_range(iterator from, iterator to)
+        constexpr void destroy_range(iterator from, iterator to)
         {
             Allocator alloc;
             for (; from != to; ++from)
@@ -666,7 +666,7 @@ class LLGL_EXPORT SmallVector
         }
 
         template <typename... TArgs>
-        void construct_single(iterator from, iterator to, TArgs&&... args)
+        constexpr void construct_single(iterator from, iterator to, TArgs&&... args)
         {
             Allocator alloc;
             for (; from != to; ++from)
@@ -674,7 +674,7 @@ class LLGL_EXPORT SmallVector
         }
 
         template <typename InputIter>
-        void construct_range(iterator pos, InputIter from, InputIter to)
+        constexpr void construct_range(iterator pos, InputIter from, InputIter to)
         {
             Allocator alloc;
             for (pointer p = pos; from != to; ++from, ++p)
@@ -682,13 +682,13 @@ class LLGL_EXPORT SmallVector
         }
 
         template <typename InputIter>
-        void move_range(iterator pos, InputIter from, InputIter to)
+        constexpr void move_range(iterator pos, InputIter from, InputIter to)
         {
             construct_range(pos, from, to);
             destroy_range(from, to);
         }
 
-        void release_heap()
+        constexpr void release_heap()
         {
             if (is_dynamic())
             {
@@ -697,9 +697,9 @@ class LLGL_EXPORT SmallVector
             }
         }
 
-        void drop_data()
+        constexpr void drop_data()
         {
-            if (LocalCapacity == 0)
+            if constexpr (LocalCapacity == 0)
             {
                 /* If vector remains dynamic, reset capacity and pointer */
                 cap_ = 0;
@@ -712,13 +712,13 @@ class LLGL_EXPORT SmallVector
             }
         }
 
-        void release()
+        constexpr void release()
         {
             destroy_range(begin(), end());
             release_heap();
         }
 
-        void realloc(size_type cap = 0)
+        constexpr void realloc(size_type cap = 0)
         {
             cap = (std::max)(cap, size_);
 
@@ -744,7 +744,7 @@ class LLGL_EXPORT SmallVector
             }
         }
 
-        void move_all(pointer dst)
+        constexpr void move_all(pointer dst)
         {
             /* Copy elements into new container, destroy old elements, and deallocate old container */
             construct_range(dst, begin(), end());
@@ -752,7 +752,7 @@ class LLGL_EXPORT SmallVector
             release_heap();
         }
 
-        void move_tail_left(iterator dst, iterator from, iterator to)
+        constexpr void move_tail_left(iterator dst, iterator from, iterator to)
         {
             Allocator alloc;
             for (; from != to; ++from, ++dst)
@@ -763,7 +763,7 @@ class LLGL_EXPORT SmallVector
             }
         }
 
-        void move_tail_right(iterator dst, iterator from, iterator to)
+        constexpr void move_tail_right(iterator dst, iterator from, iterator to)
         {
             Allocator alloc;
             const size_type count = static_cast<size_type>(std::distance(from, to));
@@ -776,7 +776,7 @@ class LLGL_EXPORT SmallVector
             }
         }
 
-        void move_tail(iterator dst, iterator from, iterator to)
+        constexpr void move_tail(iterator dst, iterator from, iterator to)
         {
             if (dst < from)
                 move_tail_left(dst, from, to);
@@ -785,7 +785,7 @@ class LLGL_EXPORT SmallVector
         }
 
         template <typename InputIter>
-        iterator insert_inline(iterator dst, InputIter src, size_type count)
+        constexpr iterator insert_inline(iterator dst, InputIter src, size_type count)
         {
             construct_range(dst, src, src + count);
             size_ += count;
@@ -793,7 +793,7 @@ class LLGL_EXPORT SmallVector
         }
 
         template <typename InputIter>
-        iterator insert_realloc(size_type offset, InputIter src, size_type count)
+        constexpr iterator insert_realloc(size_type offset, InputIter src, size_type count)
         {
             /* Allocate new container */
             const size_type cap = GrowStrategy::Grow(size() + count);
@@ -814,7 +814,7 @@ class LLGL_EXPORT SmallVector
             return begin() + offset;
         }
 
-        bool is_dynamic() const
+        constexpr bool is_dynamic() const
         {
             return (data_ != local_.data() || LocalCapacity == 0);
         }

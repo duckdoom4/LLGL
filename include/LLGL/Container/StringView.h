@@ -55,21 +55,21 @@ class LLGL_EXPORT BasicStringView
 
     public:
 
-        BasicStringView() = default;
-        BasicStringView(const BasicStringView&) = default;
-        BasicStringView(BasicStringView&&) = default;
-        BasicStringView& operator = (const BasicStringView&) = default;
-        BasicStringView& operator = (BasicStringView&&) = default;
+        constexpr BasicStringView() = default;
+        constexpr BasicStringView(const BasicStringView&) = default;
+        constexpr BasicStringView(BasicStringView&&) = default;
+        constexpr BasicStringView& operator = (const BasicStringView&) = default;
+        constexpr BasicStringView& operator = (BasicStringView&&) = default;
 
         //! Initializes the string view with the specified null-terminated string.
-        BasicStringView(const_pointer str) :
+        constexpr BasicStringView(const_pointer str) :
             data_ { str                                },
             size_ { BasicStringView::StringLength(str) }
         {
         }
 
         //! Initializes the string view with a pointer to the data and size.
-        BasicStringView(const_pointer str, size_type len) :
+        constexpr BasicStringView(const_pointer str, size_type len) :
             data_ { str },
             size_ { len }
         {
@@ -77,7 +77,7 @@ class LLGL_EXPORT BasicStringView
 
         //! Initializes the string view with another templated string class. This would usually be std::basic_string.
         template <template <class, class, class> class TString, class Allocator>
-        BasicStringView(const TString<TChar, Traits, Allocator>& str) :
+        constexpr BasicStringView(const TString<TChar, Traits, Allocator>& str) :
             data_ { str.data() },
             size_ { str.size() }
         {
@@ -90,7 +90,7 @@ class LLGL_EXPORT BasicStringView
         \see size
         \see length
         */
-        bool empty() const noexcept
+        constexpr bool empty() const noexcept
         {
             return (size_ == 0);
         }
@@ -99,7 +99,7 @@ class LLGL_EXPORT BasicStringView
         \brief Returns the length of this string. This is equivalent to \c length().
         \see length
         */
-        size_type size() const noexcept
+        constexpr size_type size() const noexcept
         {
             return size_;
         }
@@ -107,7 +107,7 @@ class LLGL_EXPORT BasicStringView
         /**
         \brief Returns the length of this string. This is equivalent to \c size().
         */
-        size_type length() const noexcept
+        constexpr size_type length() const noexcept
         {
             return size_;
         }
@@ -117,7 +117,7 @@ class LLGL_EXPORT BasicStringView
         \remarks This does not necessarily point to a NUL-terminated string like \c std::string does.
         A string view only covers a range from the first to the last character of a string whose memory is managed elsewhere.
         */
-        const_pointer data() const noexcept
+        constexpr const_pointer data() const noexcept
         {
             return data_;
         }
@@ -128,7 +128,7 @@ class LLGL_EXPORT BasicStringView
         \brief Returns a constant reference to the character at the specified zero-based position.
         \remarks If the string is empty, the behavior of this function is undefined.
         */
-        const_reference at(size_type pos) const
+        constexpr const_reference at(size_type pos) const
         {
             return data_[pos];
         }
@@ -137,7 +137,7 @@ class LLGL_EXPORT BasicStringView
         \brief Returns a constant reference to the first character of this string.
         \remarks If the string is empty, the behavior of this function is undefined.
         */
-        const_reference front() const
+        constexpr const_reference front() const
         {
             return data_[0];
         }
@@ -146,7 +146,7 @@ class LLGL_EXPORT BasicStringView
         \brief Returns a constant reference to the last character of this string.
         \remarks If the string is empty, the behavior of this function is undefined.
         */
-        const_reference back() const
+        constexpr const_reference back() const
         {
             return data_[size_ - 1];
         }
@@ -154,7 +154,7 @@ class LLGL_EXPORT BasicStringView
     public:
 
         //! \see cbegin
-        const_iterator begin() const noexcept
+        constexpr const_iterator begin() const noexcept
         {
             return data_;
         }
@@ -163,13 +163,13 @@ class LLGL_EXPORT BasicStringView
         \brief Returns constant iterator to the beginning of this string.
         \remarks This can also be used on an empty string as long as it's not dereferenced on such a string.
         */
-        const_iterator cbegin() const noexcept
+        constexpr  const_iterator cbegin() const noexcept
         {
             return data_;
         }
 
         //! \see crbegin
-        const_reverse_iterator rbegin() const
+        constexpr const_reverse_iterator rbegin() const
         {
             return const_reverse_iterator{ end() };
         }
@@ -178,13 +178,13 @@ class LLGL_EXPORT BasicStringView
         \brief Returns constant reverse iterator to the end of this string.
         \remarks This can also be used on an empty string as long as it's not dereferenced on such a string.
         */
-        const_reverse_iterator crbegin() const
+        constexpr const_reverse_iterator crbegin() const
         {
             return const_reverse_iterator{ cend() };
         }
 
         //! \see cend
-        const_iterator end() const noexcept
+        constexpr const_iterator end() const noexcept
         {
             return data_ + size_;
         }
@@ -193,13 +193,13 @@ class LLGL_EXPORT BasicStringView
         \brief Returns constant iterator to the end of this string.
         \remarks This can also be used on an empty string as long as it's not dereferenced on such a string.
         */
-        const_iterator cend() const noexcept
+        constexpr const_iterator cend() const noexcept
         {
             return data_ + size_;
         }
 
         //! \see crend
-        const_reverse_iterator rend() const
+        constexpr const_reverse_iterator rend() const
         {
             return const_reverse_iterator{ begin() };
         }
@@ -208,7 +208,7 @@ class LLGL_EXPORT BasicStringView
         \brief Returns constant reverse iterator to the beginning of this string.
         \remarks This can also be used on an empty string as long as it's not dereferenced on such a string.
         */
-        const_reverse_iterator crend() const
+        constexpr const_reverse_iterator crend() const
         {
             return const_reverse_iterator{ cbegin() };
         }
@@ -221,7 +221,7 @@ class LLGL_EXPORT BasicStringView
         \param[in] count Optional length of the sub-view. This will be clamped to the size of this string minus the input position \c pos. By default \c npos.
         \return Empty string view if \c pos is out of bounds.
         */
-        BasicStringView substr(size_type pos = 0, size_type count = npos) const
+        constexpr BasicStringView substr(size_type pos = 0, size_type count = npos) const
         {
             if (pos > size())
                 return BasicStringView{};
@@ -235,7 +235,7 @@ class LLGL_EXPORT BasicStringView
         +1 if this string is considered to be ordered \e after the other string,
         and 0 otherwise.
         */
-        int compare(const BasicStringView& str) const
+        constexpr int compare(const BasicStringView& str) const
         {
             size_type n = (std::min)(size(), str.size());
             int result = Traits::compare(data(), str.data(), n);
@@ -254,7 +254,7 @@ class LLGL_EXPORT BasicStringView
         \brief Compares a sub-view of this string with the specified string.
         \see compare(const BasicStringView&)
         */
-        int compare(size_type pos1, size_type count1, const BasicStringView& str) const
+        constexpr int compare(size_type pos1, size_type count1, const BasicStringView& str) const
         {
             return substr(pos1, count1).compare(str);
         }
@@ -263,13 +263,13 @@ class LLGL_EXPORT BasicStringView
         \brief Compares a sub-view of this string with a sub-view of the specified string.
         \see compare(const BasicStringView&)
         */
-        int compare(size_type pos1, size_type count1, const BasicStringView& str, size_type pos2, size_type count2 = npos) const
+        constexpr int compare(size_type pos1, size_type count1, const BasicStringView& str, size_type pos2, size_type count2 = npos) const
         {
             return substr(pos1, count1).compare(str.substr(pos2, count2));
         }
 
         //! \return Position of the first character that equals the input character starting from position \c pos. Otherwise, StringView::npos is returned.
-        size_type find(TChar chr, size_type pos = 0) const noexcept
+        constexpr size_type find(TChar chr, size_type pos = 0) const noexcept
         {
             while (pos < size())
             {
@@ -280,42 +280,42 @@ class LLGL_EXPORT BasicStringView
             return BasicStringView::npos;
         }
 
-        size_type find_first_of(const TChar* sequence, size_type pos = 0) const noexcept
+        constexpr size_type find_first_of(const TChar* sequence, size_type pos = 0) const noexcept
         {
             return FindFirstPositionOf<true>(sequence, pos, size());
         }
 
-        size_type find_first_of(const TChar* sequence, size_type pos, size_type count) const noexcept
+        constexpr size_type find_first_of(const TChar* sequence, size_type pos, size_type count) const noexcept
         {
             return FindFirstPositionOf<true>(sequence, pos, (std::min)(count, size()));
         }
 
-        size_type find_first_not_of(const TChar* sequence, size_type pos = 0) const noexcept
+        constexpr size_type find_first_not_of(const TChar* sequence, size_type pos = 0) const noexcept
         {
             return FindFirstPositionOf<false>(sequence, pos, size());
         }
 
-        size_type find_first_not_of(const TChar* sequence, size_type pos, size_type count) const noexcept
+        constexpr size_type find_first_not_of(const TChar* sequence, size_type pos, size_type count) const noexcept
         {
             return FindFirstPositionOf<false>(sequence, pos, (std::min)(count, size()));
         }
 
-        size_type find_last_of(const TChar* sequence, size_type pos = BasicStringView::npos) const noexcept
+        constexpr size_type find_last_of(const TChar* sequence, size_type pos = BasicStringView::npos) const noexcept
         {
             return FindLastPositionOf<true>(sequence, pos, size());
         }
 
-        size_type find_last_of(const TChar* sequence, size_type pos, size_type count) const noexcept
+        constexpr size_type find_last_of(const TChar* sequence, size_type pos, size_type count) const noexcept
         {
             return FindLastPositionOf<true>(sequence, pos, (std::min)(count, size()));
         }
 
-        size_type find_last_not_of(const TChar* sequence, size_type pos = BasicStringView::npos) const noexcept
+        constexpr size_type find_last_not_of(const TChar* sequence, size_type pos = BasicStringView::npos) const noexcept
         {
             return FindLastPositionOf<false>(sequence, pos, size());
         }
 
-        size_type find_last_not_of(const TChar* sequence, size_type pos, size_type count) const noexcept
+        constexpr size_type find_last_not_of(const TChar* sequence, size_type pos, size_type count) const noexcept
         {
             return FindLastPositionOf<false>(sequence, pos, (std::min)(count, size()));
         }
@@ -323,7 +323,7 @@ class LLGL_EXPORT BasicStringView
     public:
 
         //! \see at
-        const_reference operator [] (size_type pos) const
+        constexpr const_reference operator [] (size_type pos) const
         {
             return data_[pos];
         }
@@ -336,7 +336,7 @@ class LLGL_EXPORT BasicStringView
     private:
 
         // Custom implementation of ::strlen for generic string characters.
-        static size_type StringLength(const_pointer str)
+        constexpr static size_type StringLength(const_pointer str)
         {
             if (str != nullptr)
             {
@@ -348,7 +348,7 @@ class LLGL_EXPORT BasicStringView
         }
 
         template <bool Predicate>
-        size_type FindFirstPositionOf(const TChar* sequence, size_type pos, size_type count) const noexcept
+        constexpr size_type FindFirstPositionOf(const TChar* sequence, size_type pos, size_type count) const noexcept
         {
             pos = (std::min)(pos, count);
             while (pos < size())
@@ -364,7 +364,7 @@ class LLGL_EXPORT BasicStringView
         }
 
         template <bool Predicate>
-        size_type FindLastPositionOf(const TChar* sequence, size_type pos, size_type count) const noexcept
+        constexpr size_type FindLastPositionOf(const TChar* sequence, size_type pos, size_type count) const noexcept
         {
             pos = (std::min)(pos, count);
             while (pos > 0)

@@ -46,29 +46,51 @@ class LLGL_EXPORT UTF8String
     public:
 
         //! Initialize an empty string.
-        UTF8String();
+        constexpr UTF8String() :
+            data_{ '\0' }
+        {
+        }
 
         //! Initialies the UTF-8 string with a copy of the specified string.
-        UTF8String(const UTF8String& rhs);
+        constexpr UTF8String(const UTF8String& rhs) :
+            data_{ rhs.data_ }
+        {
+        }
 
         //! Takes the ownership of the specified UTF-8 string.
-        UTF8String(UTF8String&& rhs) noexcept;
+        constexpr UTF8String(UTF8String&& rhs) noexcept :
+            data_{ std::move(rhs.data_) }
+        {
+            rhs.clear();
+        }
 
         //! Initializes the UTF-8 string with a copy of the specified string view.
-        UTF8String(const StringView& str);
+        constexpr UTF8String(const StringView& str) :
+            data_{ ConvertStringViewToCharArray(str) }
+        {
+        }
 
         //! Initializes the UTF-8 string with a UTF-8 encoded conversion of the specified wide string view.
-        UTF8String(const WStringView& str);
+        constexpr UTF8String(const WStringView& str) :
+            data_{ ConvertWStringViewToUTF8CharArray(str) }
+        {
+        }
 
         //! Initializes the UTF-8 string with a copy of the specified null-terminated string.
-        UTF8String(const char* str);
+        constexpr UTF8String(const char* str) :
+            UTF8String{ StringView{ str } }
+        {
+        }
 
         //! Initializes the UTF-8 string with a UTF-8 encoded conversion of the specified null-terminated wide string.
-        UTF8String(const wchar_t* str);
+        constexpr UTF8String(const wchar_t* str) :
+            UTF8String{ WStringView{ str } }
+        {
+        }
 
         //! Initializes the UTF-8 string with a copy of another templated string class. This would usually be std::basic_string.
         template <template <class, class, class> class TString, class TChar, class Traits, class Allocator>
-        UTF8String(const TString<TChar, Traits, Allocator>& str) :
+        constexpr UTF8String(const TString<TChar, Traits, Allocator>& str) :
             UTF8String { str.c_str() }
         {
         }
@@ -166,7 +188,7 @@ class LLGL_EXPORT UTF8String
 
     public:
 
-        void clear();
+        constexpr void clear();
 
         int compare(const StringView& str) const;
         int compare(size_type pos1, size_type count1, const StringView& str) const;
@@ -219,6 +241,100 @@ class LLGL_EXPORT UTF8String
         }
 
     private:
+        constexpr static std::size_t GetUTF8CharCount(int c)
+        {
+            if (c < 0x0080)
+            {
+                /* U+0000 ... U+007F */
+                return 1;
+            }
+            else if (c < 0x07FF)
+            {
+                /* U+0080 ... U+07FF */
+                return 2;
+            }
+            else if (c < 0xFFFF)
+            {
+                /* U+0800 ... U+FFFF */
+                return 3;
+            }
+            else
+            {
+                /* U+10000 ... U+10FFFF */
+                return 4;
+            }
+        }
+
+        constexpr static std::size_t GetUTF8CharCount(const WStringView& s)
+        {
+            std::size_t len = 0;
+
+            for (int c : s)
+                len += GetUTF8CharCount(c);
+
+            return len;
+        }
+
+        // Appends a unicode character encoded in UTF-8 to the specified string buffer and returns a pointer to the next character in that buffer.
+        // see https://en.wikipedia.org/wiki/UTF-8
+        constexpr static void AppendUTF8Character(SmallVector<char>& str, int code)
+        {
+            if (code < 0x0080)
+            {
+                /* U+0000 ... U+007F */
+                str.push_back(static_cast<char>(code));                         // 0ccccccc
+            }
+            else if (code < 0x07FF)
+            {
+                /* U+0080 ... U+07FF */
+                str.reserve(str.size() + 2);
+                str.push_back(static_cast<char>(0xC0 | ((code >> 6) & 0x1F))); // 110ccccc
+                str.push_back(static_cast<char>(0x80 | (code & 0x3F))); // 10cccccc
+            }
+            else if (code < 0xFFFF)
+            {
+                /* U+0800 ... U+FFFF */
+                str.reserve(str.size() + 3);
+                str.push_back(static_cast<char>(0xE0 | ((code >> 12) & 0x0F))); // 1110cccc
+                str.push_back(static_cast<char>(0x80 | ((code >> 6) & 0x3F))); // 10cccccc
+                str.push_back(static_cast<char>(0x80 | (code & 0x3F))); // 10cccccc
+            }
+            else
+            {
+                /* U+10000 ... U+10FFFF */
+                str.reserve(str.size() + 4);
+                str.push_back(static_cast<char>(0xF0 | ((code >> 18) & 0x07))); // 11110ccc
+                str.push_back(static_cast<char>(0x80 | ((code >> 12) & 0x3F))); // 10cccccc
+                str.push_back(static_cast<char>(0x80 | ((code >> 6) & 0x3F))); // 10cccccc
+                str.push_back(static_cast<char>(0x80 | (code & 0x3F))); // 10cccccc
+            }
+        }
+
+        constexpr static SmallVector<char> ConvertWStringViewToUTF8CharArray(const WStringView& s)
+        {
+            /* Allocate buffer for UTF-16 string */
+            const auto len = GetUTF8CharCount(s);
+
+            SmallVector<char> utf8;
+            utf8.reserve(len + 1);
+
+            /* Encode UTF-8 string */
+            for (int c : s)
+                AppendUTF8Character(utf8, c);
+
+            utf8.push_back('\0');
+
+            return utf8;
+        }
+
+        constexpr static SmallVector<char> ConvertStringViewToCharArray(const StringView& str)
+        {
+            SmallVector<char> data;
+            data.reserve(str.size() + 1);
+            data.insert(data.end(), str.begin(), str.end());
+            data.push_back('\0');
+            return data;
+        }
 
         SmallVector<char> data_;
 
