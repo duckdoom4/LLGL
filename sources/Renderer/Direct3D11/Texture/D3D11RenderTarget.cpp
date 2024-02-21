@@ -286,8 +286,8 @@ ID3D11Texture2D* D3D11RenderTarget::CreateInternalTexture(ID3D11Device* device, 
     /* Create internal 2D texture resource */
     D3D11_TEXTURE2D_DESC texDesc;
     {
-        texDesc.Width           = resolution_.width;
-        texDesc.Height          = resolution_.height;
+        texDesc.Width           = resolution_.x;
+        texDesc.Height          = resolution_.y;
         texDesc.MipLevels       = 1;
         texDesc.ArraySize       = 1;
         texDesc.Format          = format;

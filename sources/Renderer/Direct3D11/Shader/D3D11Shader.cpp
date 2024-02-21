@@ -614,9 +614,9 @@ HRESULT D3D11Shader::ReflectShaderByteCode(ShaderReflection& reflection) const
     if (GetType() == ShaderType::Compute)
     {
         reflectionObject->GetThreadGroupSize(
-            &(reflection.compute.workGroupSize.width),
-            &(reflection.compute.workGroupSize.height),
-            &(reflection.compute.workGroupSize.depth)
+            &(reflection.compute.workGroupSize.x),
+            &(reflection.compute.workGroupSize.y),
+            &(reflection.compute.workGroupSize.z)
         );
     }
 

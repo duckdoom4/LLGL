@@ -398,7 +398,7 @@ void VKCommandBuffer::CopyTextureFromFramebuffer(
     if (boundSwapChain_ == nullptr)
         return /*No bound framebuffer*/;
 
-    if (dstRegion.extent.depth != 1 ||
+    if (dstRegion.extent.z != 1 ||
         dstRegion.offset.x < 0      ||
         dstRegion.offset.y < 0      ||
         dstRegion.offset.z < 0)

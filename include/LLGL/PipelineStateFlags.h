@@ -325,15 +325,15 @@ struct Viewport
 
     //! Viewport constructor with extent and default depth range of [0, 1].
     inline Viewport(const Extent2D& extent) :
-        width  { static_cast<float>(extent.width)  },
-        height { static_cast<float>(extent.height) }
+        width  { static_cast<float>(extent.x)  },
+        height { static_cast<float>(extent.y) }
     {
     }
 
     //! Viewport constructor with extent and explicit depth range.
     inline Viewport(const Extent2D& extent, float minDepth, float maxDepth) :
-        width    { static_cast<float>(extent.width)  },
-        height   { static_cast<float>(extent.height) },
+        width    { static_cast<float>(extent.x)  },
+        height   { static_cast<float>(extent.y) },
         minDepth { minDepth                          },
         maxDepth { maxDepth                          }
     {
@@ -343,8 +343,8 @@ struct Viewport
     inline Viewport(const Offset2D& offset, const Extent2D& extent) :
         x      { static_cast<float>(offset.x)      },
         y      { static_cast<float>(offset.y)      },
-        width  { static_cast<float>(extent.width)  },
-        height { static_cast<float>(extent.height) }
+        width  { static_cast<float>(extent.x)  },
+        height { static_cast<float>(extent.y) }
     {
     }
 
@@ -352,8 +352,8 @@ struct Viewport
     inline Viewport(const Offset2D& offset, const Extent2D& extent, float minDepth, float maxDepth) :
         x        { static_cast<float>(offset.x)      },
         y        { static_cast<float>(offset.y)      },
-        width    { static_cast<float>(extent.width)  },
-        height   { static_cast<float>(extent.height) },
+        width    { static_cast<float>(extent.x)  },
+        height   { static_cast<float>(extent.y) },
         minDepth { minDepth                          },
         maxDepth { maxDepth                          }
     {
@@ -415,8 +415,8 @@ struct Scissor
     inline Scissor(const Offset2D& offset, const Extent2D& extent) :
         x      { offset.x                                 },
         y      { offset.y                                 },
-        width  { static_cast<std::int32_t>(extent.width)  },
-        height { static_cast<std::int32_t>(extent.height) }
+        width  { static_cast<std::int32_t>(extent.x)  },
+        height { static_cast<std::int32_t>(extent.y) }
     {
     }
 

@@ -383,8 +383,8 @@ HRESULT D3D12SwapChain::CreateResolutionDependentResources(const Extent2D& resol
         /* Resize swap chain */
         HRESULT hr = swapChainDXGI_->ResizeBuffers(
             numColorBuffers_,
-            resolution.width,
-            resolution.height,
+            resolution.x,
+            resolution.y,
             colorFormat_,
             0
         );
@@ -405,8 +405,8 @@ HRESULT D3D12SwapChain::CreateResolutionDependentResources(const Extent2D& resol
 
         DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
         {
-            swapChainDesc.Width                 = resolution.width;
-            swapChainDesc.Height                = resolution.height;
+            swapChainDesc.Width                 = resolution.x;
+            swapChainDesc.Height                = resolution.y;
             swapChainDesc.Format                = colorFormat_;
             swapChainDesc.Stereo                = FALSE;
             swapChainDesc.SampleDesc.Count      = 1; // always 1 because D3D12 does not allow (directly) multi-sampled swap-chains
@@ -453,8 +453,8 @@ void D3D12SwapChain::CreateColorBufferRTVs(ID3D12Device* device, const Extent2D&
         /* Create multi-sampled render targets */
         auto tex2DMSDesc = CD3DX12_RESOURCE_DESC::Tex2D(
             colorFormat_,
-            resolution.width,
-            resolution.height,
+            resolution.x,
+            resolution.y,
             1, // arraySize
             1, // mipLevels
             sampleDesc_.Count,
@@ -496,8 +496,8 @@ void D3D12SwapChain::CreateDepthStencil(ID3D12Device* device, const Extent2D& re
     /* Create depth-stencil buffer */
     auto tex2DDesc = CD3DX12_RESOURCE_DESC::Tex2D(
         depthStencilFormat_,
-        resolution.width,
-        resolution.height,
+        resolution.x,
+        resolution.y,
         1, // arraySize
         1, // mipLevels
         sampleDesc_.Count,

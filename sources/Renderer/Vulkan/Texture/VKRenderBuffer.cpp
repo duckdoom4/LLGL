@@ -46,7 +46,7 @@ void VKRenderBuffer::Create(
         /*device:*/             deviceMemoryMngr.GetVkDevice(),
         /*imageType:*/          VK_IMAGE_TYPE_2D,
         /*format:*/             format,
-        /*extent:*/             VkExtent3D{ extent.width, extent.height, 1 },
+        /*extent:*/             VkExtent3D{ extent.x, extent.y, 1 },
         /*numMipLevels:*/       1,
         /*numArrayLayers:*/     1,
         /*createFlags:*/        0,

@@ -255,7 +255,7 @@ private:
             #endif
 
             // Copy content buffer to destination texture
-            for (int y = 0; y < static_cast<int>(dstTextureSize.height); y += 8)
+            for (int y = 0; y < static_cast<int>(dstTextureSize.y); y += 8)
             {
                 commands->CopyTextureFromBuffer(
                     *dstTextures[0],

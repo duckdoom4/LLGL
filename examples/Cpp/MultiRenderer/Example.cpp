@@ -115,12 +115,12 @@ MyRenderer::MyRenderer(
 
     // Build viewport
     const LLGL::Extent2D resolution = swapChain->GetResolution();
-    const float scaleFactor = static_cast<float>(resolution.width) / static_cast<float>(subWindowSize.width);
+    const float scaleFactor = static_cast<float>(resolution.x) / static_cast<float>(subWindowSize.x);
 
     viewport.x      = scaleFactor * static_cast<float>(-subWindowOffset.x);
     viewport.y      = scaleFactor * static_cast<float>(-subWindowOffset.y);
-    viewport.width  = scaleFactor * static_cast<float>(subWindowSize.width * 2u);
-    viewport.height = scaleFactor * static_cast<float>(subWindowSize.height * 2u);
+    viewport.width  = scaleFactor * static_cast<float>(subWindowSize.x * 2u);
+    viewport.height = scaleFactor * static_cast<float>(subWindowSize.y * 2u);
 
     // Enable V-sync
     swapChain->SetVsyncInterval(1);
@@ -320,10 +320,10 @@ int main(int argc, char* argv[])
         std::unique_ptr<LLGL::Window> mainWindow = LLGL::Window::Create(mainWindowDesc);
 
         // Create renderers
-        const LLGL::Extent2D subWindowSize{ resolution.width/2, resolution.height/2 };
+        const LLGL::Extent2D subWindowSize{ resolution.x/2, resolution.y/2 };
 
-        const int halfWidth     = static_cast<int>(subWindowSize.width);
-        const int halfHeight    = static_cast<int>(subWindowSize.height);
+        const int halfWidth     = static_cast<int>(subWindowSize.x);
+        const int halfHeight    = static_cast<int>(subWindowSize.y);
 
         const float bgColors[4][4] =
         {
@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
         LLGL::Input input{ *mainWindow };
 
         // Initialize matrices (OpenGL needs a unit-cube NDC-space)
-        const float aspectRatio = static_cast<float>(mainWindowDesc.size.width) / static_cast<float>(mainWindowDesc.size.height);
+        const float aspectRatio = static_cast<float>(mainWindowDesc.size.x) / static_cast<float>(mainWindowDesc.size.y);
         const float nearPlane   = 0.1f;
         const float farPlane    = 100.0f;
         const float fieldOfView = 45.0f;

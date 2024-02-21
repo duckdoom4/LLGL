@@ -10,7 +10,7 @@
 #include <LLGL/Window.h>
 #include <LLGL/Canvas.h>
 #include <LLGL/Container/Strings.h>
-#include <string.h>
+#include <string>
 #include <vector>
 #include <algorithm>
 #include <memory>

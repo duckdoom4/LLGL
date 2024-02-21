@@ -139,9 +139,9 @@ private:
             textureDesc.type            = LLGL::TextureType::Texture2D;
             textureDesc.bindFlags       = LLGL::BindFlags::DepthStencilAttachment | LLGL::BindFlags::Sampled;
             textureDesc.format          = LLGL::Format::D32Float;
-            textureDesc.extent.width    = shadowMapResolution.width;
-            textureDesc.extent.height   = shadowMapResolution.height;
-            textureDesc.extent.depth    = 1;
+            textureDesc.extent.x    = shadowMapResolution.x;
+            textureDesc.extent.y   = shadowMapResolution.y;
+            textureDesc.extent.z    = 1;
             textureDesc.mipLevels       = 1;
         }
         shadowMap = renderer->CreateTexture(textureDesc);

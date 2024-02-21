@@ -162,26 +162,26 @@ void DDSImageReader::LoadFromFile(const std::string& filename)
     // Store parameters in descriptors
     texDesc_.bindFlags      = LLGL::BindFlags::Sampled;
     texDesc_.miscFlags      = 0;
-    texDesc_.extent.width   = static_cast<std::uint32_t>(header.width);
-    texDesc_.extent.height  = static_cast<std::uint32_t>(header.height);
+    texDesc_.extent.x   = static_cast<std::uint32_t>(header.width);
+    texDesc_.extent.y  = static_cast<std::uint32_t>(header.height);
     texDesc_.mipLevels      = header.mipMapCount;
 
     if (isCubeMap)
     {
         texDesc_.type           = LLGL::TextureType::TextureCube;
-        texDesc_.extent.depth   = 1;
+        texDesc_.extent.z   = 1;
         texDesc_.arrayLayers    = 6;
     }
     else if (hasDepth)
     {
         texDesc_.type           = LLGL::TextureType::Texture3D;
-        texDesc_.extent.depth   = static_cast<std::uint32_t>(header.depth);
+        texDesc_.extent.z   = static_cast<std::uint32_t>(header.depth);
         texDesc_.arrayLayers    = 1;
     }
     else
     {
         texDesc_.type           = LLGL::TextureType::Texture2D;
-        texDesc_.extent.depth   = 1;
+        texDesc_.extent.z   = 1;
         texDesc_.arrayLayers    = 1;
     }
 
@@ -232,15 +232,15 @@ void DDSImageReader::LoadFromFile(const std::string& filename)
     {
         // Save offset and size of current MIP-map into data container
         mip.offset  = bufferSize;
-        mip.size    = extent.width * extent.height * extent.depth;
+        mip.size    = extent.x * extent.y * extent.z;
         if (texDesc_.format == LLGL::Format::BC1UNorm)
             mip.size /= 2;
         mips_.push_back(mip);
 
         // Reduce extent to keep track of next MIP-map extent
-        extent.width    = std::max(extent.width  / 2, 1u);
-        extent.height   = std::max(extent.height / 2, 1u);
-        extent.depth    = std::max(extent.depth  / 2, 1u);
+        extent.x    = std::max(extent.x  / 2, 1u);
+        extent.y   = std::max(extent.y / 2, 1u);
+        extent.z    = std::max(extent.z  / 2, 1u);
 
         // Accumulate buffer size to read data at once
         bufferSize += mip.size;

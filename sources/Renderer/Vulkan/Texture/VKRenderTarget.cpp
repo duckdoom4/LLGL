@@ -317,8 +317,8 @@ void VKRenderTarget::CreateFramebuffer(
         createInfo.renderPass       = renderPass_->GetVkRenderPass();
         createInfo.attachmentCount  = attachmentCount;
         createInfo.pAttachments     = attachmentImageViews;
-        createInfo.width            = resolution.width;
-        createInfo.height           = resolution.height;
+        createInfo.width            = resolution.x;
+        createInfo.height           = resolution.y;
         createInfo.layers           = 1;
     }
     VkResult result = vkCreateFramebuffer(device, &createInfo, nullptr, framebuffer_.ReleaseAndGetAddressOf());

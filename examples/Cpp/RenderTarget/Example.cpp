@@ -273,7 +273,7 @@ private:
 
         // Create empty render-target texture
         renderTargetTex = renderer->CreateTexture(
-            LLGL::Texture2DDesc(LLGL::Format::RGBA8UNorm, renderTargetSize.width, renderTargetSize.height)
+            LLGL::Texture2DDesc(LLGL::Format::RGBA8UNorm, renderTargetSize.x, renderTargetSize.y)
         );
         renderTargetTex->SetDebugName("RenderTargetTex");
 
@@ -285,8 +285,8 @@ private:
             depthTexDesc.debugName      = "RenderTargetDepthTex";
             depthTexDesc.bindFlags      = LLGL::BindFlags::DepthStencilAttachment;
             depthTexDesc.format         = LLGL::Format::D32Float;
-            depthTexDesc.extent.width   = renderTargetSize.width;
-            depthTexDesc.extent.height  = renderTargetSize.height;
+            depthTexDesc.extent.x   = renderTargetSize.x;
+            depthTexDesc.extent.y  = renderTargetSize.y;
             depthTexDesc.mipLevels      = 1;
             depthTexDesc.samples        = samples;
             depthTexDesc.type           = (depthTexDesc.samples > 1 ? LLGL::TextureType::Texture2DMS : LLGL::TextureType::Texture2D);

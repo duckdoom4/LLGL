@@ -157,7 +157,7 @@ static void GLTextureSubImage1D(GLuint texID, const TextureRegion& region, const
         texID,
         region.subresource.baseMipLevel,
         region.offset.x,
-        region.extent.width,
+        region.extent.x,
         imageView,
         internalFormat
     );
@@ -170,8 +170,8 @@ static void GLTextureSubImage2D(GLuint texID, const TextureRegion& region, const
         region.subresource.baseMipLevel,
         region.offset.x,
         region.offset.y,
-        region.extent.width,
-        region.extent.height,
+        region.extent.x,
+        region.extent.y,
         imageView,
         internalFormat
     );
@@ -185,9 +185,9 @@ static void GLTextureSubImage3D(GLuint texID, const TextureRegion& region, const
         region.offset.x,
         region.offset.y,
         region.offset.z,
-        region.extent.width,
-        region.extent.height,
-        region.extent.depth,
+        region.extent.x,
+        region.extent.y,
+        region.extent.z,
         imageView,
         internalFormat
     );
@@ -201,8 +201,8 @@ static void GLTextureSubImageCube(GLuint texID, const TextureRegion& region, con
         region.offset.x,
         region.offset.y,
         region.subresource.baseArrayLayer,
-        region.extent.width,
-        region.extent.height,
+        region.extent.x,
+        region.extent.y,
         1,
         imageView,
         internalFormat
@@ -216,7 +216,7 @@ static void GLTextureSubImage1DArray(GLuint texID, const TextureRegion& region, 
         region.subresource.baseMipLevel,
         region.offset.x,
         region.subresource.baseArrayLayer,
-        region.extent.width,
+        region.extent.x,
         region.subresource.numArrayLayers,
         imageView,
         internalFormat
@@ -231,8 +231,8 @@ static void GLTextureSubImage2DArray(GLuint texID, const TextureRegion& region, 
         region.offset.x,
         region.offset.y,
         region.subresource.baseArrayLayer,
-        region.extent.width,
-        region.extent.height,
+        region.extent.x,
+        region.extent.y,
         region.subresource.numArrayLayers,
         imageView,
         internalFormat
@@ -247,8 +247,8 @@ static void GLTextureSubImageCubeArray(GLuint texID, const TextureRegion& region
         region.offset.x,
         region.offset.y,
         region.subresource.baseArrayLayer,
-        region.extent.width,
-        region.extent.height,
+        region.extent.x,
+        region.extent.y,
         region.subresource.numArrayLayers,
         imageView,
         internalFormat

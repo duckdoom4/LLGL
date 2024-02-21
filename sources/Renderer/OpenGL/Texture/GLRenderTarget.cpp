@@ -25,7 +25,7 @@ namespace LLGL
 
 
 GLRenderTarget::GLRenderTarget(const RenderingLimits& limits, const RenderTargetDescriptor& desc) :
-    resolution_  { static_cast<GLint>(desc.resolution.width), static_cast<GLint>(desc.resolution.height) },
+    resolution_  { static_cast<GLint>(desc.resolution.x), static_cast<GLint>(desc.resolution.y) },
     drawBuffers_ { SmallVector<GLenum, 2>(std::size_t(NumActiveColorAttachments(desc)))                  },
     samples_     { static_cast<GLint>(GetLimitedRenderTargetSamples(limits, desc))                       },
     renderPass_  { desc.renderPass                                                                       }

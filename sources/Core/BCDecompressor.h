@@ -18,8 +18,6 @@ namespace LLGL
 {
 
 
-struct Extent2D;
-
 /* ----- Functions ----- */
 
 /*

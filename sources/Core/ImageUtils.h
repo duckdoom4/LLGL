@@ -10,14 +10,13 @@
 
 
 #include <LLGL/Export.h>
+#include <LLGL/Types.h>
 #include <cstdint>
 
 
 namespace LLGL
 {
 
-
-struct Extent3D;
 
 /* ----- Functions ----- */
 

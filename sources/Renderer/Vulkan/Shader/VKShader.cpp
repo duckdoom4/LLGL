@@ -450,9 +450,9 @@ bool VKShader::ReflectLocalSize(Extent3D& outLocalSize) const
     SpirvReflectExecutionMode(SpirvModuleView{ shaderCode_ }, executionMode);
 
     /* Return local work group size */
-    outLocalSize.width  = executionMode.localSizeX;
-    outLocalSize.height = executionMode.localSizeY;
-    outLocalSize.depth  = executionMode.localSizeZ;
+    outLocalSize.x  = executionMode.localSizeX;
+    outLocalSize.y = executionMode.localSizeY;
+    outLocalSize.z  = executionMode.localSizeZ;
 
     return true;
 }

@@ -58,9 +58,9 @@ Extent3D D3D12Texture::GetMipExtent(std::uint32_t mipLevel) const
         {
             if (mipLevel < desc.MipLevels)
             {
-                size.width  = std::max(1u, static_cast<std::uint32_t>(desc.Width) >> mipLevel);
-                size.height = desc.DepthOrArraySize;
-                size.depth  = 1u;
+                size.x  = std::max(1u, static_cast<std::uint32_t>(desc.Width) >> mipLevel);
+                size.y = desc.DepthOrArraySize;
+                size.z  = 1u;
             }
         }
         break;
@@ -69,9 +69,9 @@ Extent3D D3D12Texture::GetMipExtent(std::uint32_t mipLevel) const
         {
             if (mipLevel < desc.MipLevels)
             {
-                size.width  = std::max(1u, static_cast<std::uint32_t>(desc.Width) >> mipLevel);
-                size.height = std::max(1u, desc.Height >> mipLevel);
-                size.depth  = desc.DepthOrArraySize;
+                size.x  = std::max(1u, static_cast<std::uint32_t>(desc.Width) >> mipLevel);
+                size.y = std::max(1u, desc.Height >> mipLevel);
+                size.z  = desc.DepthOrArraySize;
             }
         }
         break;
@@ -80,9 +80,9 @@ Extent3D D3D12Texture::GetMipExtent(std::uint32_t mipLevel) const
         {
             if (mipLevel < desc.MipLevels)
             {
-                size.width  = std::max(1u, static_cast<std::uint32_t>(desc.Width) >> mipLevel);
-                size.height = std::max(1u, desc.Height >> mipLevel);
-                size.depth  = std::max(1u, static_cast<std::uint32_t>(desc.DepthOrArraySize) >> mipLevel);
+                size.x  = std::max(1u, static_cast<std::uint32_t>(desc.Width) >> mipLevel);
+                size.y = std::max(1u, desc.Height >> mipLevel);
+                size.z  = std::max(1u, static_cast<std::uint32_t>(desc.DepthOrArraySize) >> mipLevel);
             }
         }
         break;
@@ -111,7 +111,7 @@ TextureDescriptor D3D12Texture::GetDesc() const
     {
         case TextureType::Texture1D:
         case TextureType::Texture1DArray:
-            texDesc.extent.width    = static_cast<std::uint32_t>(desc.Width);
+            texDesc.extent.x    = static_cast<std::uint32_t>(desc.Width);
             texDesc.arrayLayers     = desc.DepthOrArraySize;
             break;
 
@@ -119,21 +119,21 @@ TextureDescriptor D3D12Texture::GetDesc() const
         case TextureType::Texture2DArray:
         case TextureType::TextureCube:
         case TextureType::TextureCubeArray:
-            texDesc.extent.width    = static_cast<std::uint32_t>(desc.Width);
-            texDesc.extent.height   = desc.Height;
+            texDesc.extent.x    = static_cast<std::uint32_t>(desc.Width);
+            texDesc.extent.y   = desc.Height;
             texDesc.arrayLayers     = desc.DepthOrArraySize;
             break;
 
         case TextureType::Texture3D:
-            texDesc.extent.width    = static_cast<std::uint32_t>(desc.Width);
-            texDesc.extent.height   = desc.Height;
-            texDesc.extent.depth    = desc.DepthOrArraySize;
+            texDesc.extent.x    = static_cast<std::uint32_t>(desc.Width);
+            texDesc.extent.y   = desc.Height;
+            texDesc.extent.z    = desc.DepthOrArraySize;
             break;
 
         case TextureType::Texture2DMS:
         case TextureType::Texture2DMSArray:
-            texDesc.extent.width    = static_cast<std::uint32_t>(desc.Width);
-            texDesc.extent.height   = desc.Height;
+            texDesc.extent.x    = static_cast<std::uint32_t>(desc.Width);
+            texDesc.extent.y   = desc.Height;
             texDesc.arrayLayers     = desc.DepthOrArraySize;
             texDesc.samples         = desc.SampleDesc.Count;
             texDesc.miscFlags       |= MiscFlags::FixedSamples;
@@ -194,7 +194,7 @@ static void ConvertD3DTextureExtent(D3D12_RESOURCE_DESC& outDesc, TextureType ty
     {
         case TextureType::Texture1D:
         case TextureType::Texture1DArray:
-            outDesc.Width               = extent.width;
+            outDesc.Width               = extent.x;
             outDesc.Height              = 1;
             outDesc.DepthOrArraySize    = std::max(1u, arrayLayers);
             break;
@@ -203,21 +203,21 @@ static void ConvertD3DTextureExtent(D3D12_RESOURCE_DESC& outDesc, TextureType ty
         case TextureType::Texture2DArray:
         case TextureType::TextureCube:
         case TextureType::TextureCubeArray:
-            outDesc.Width               = extent.width;
-            outDesc.Height              = extent.height;
+            outDesc.Width               = extent.x;
+            outDesc.Height              = extent.y;
             outDesc.DepthOrArraySize    = std::max(1u, arrayLayers);
             break;
 
         case TextureType::Texture3D:
-            outDesc.Width               = extent.width;
-            outDesc.Height              = extent.height;
-            outDesc.DepthOrArraySize    = extent.depth;
+            outDesc.Width               = extent.x;
+            outDesc.Height              = extent.y;
+            outDesc.DepthOrArraySize    = extent.z;
             break;
 
         case TextureType::Texture2DMS:
         case TextureType::Texture2DMSArray:
-            outDesc.Width               = extent.width;
-            outDesc.Height              = extent.height;
+            outDesc.Width               = extent.x;
+            outDesc.Height              = extent.y;
             outDesc.DepthOrArraySize    = arrayLayers;
             break;
     }
@@ -355,12 +355,12 @@ static void GetMemoryFootprintWithAlignment(
     UINT64&         outBufferSize)
 {
     const FormatAttributes& formatAttribs   = GetFormatAttribs(format);
-    const UINT              rowSize         = extent.width * formatAttribs.bitSize / (8u * formatAttribs.blockWidth);
+    const UINT              rowSize         = extent.x * formatAttribs.bitSize / (8u * formatAttribs.blockWidth);
 
-    layerSize       = rowSize * (extent.height / formatAttribs.blockHeight);
+    layerSize       = rowSize * (extent.y / formatAttribs.blockHeight);
     rowStride       = GetAlignedSize<UINT>(rowSize, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
-    layerStride     = GetAlignedSize<UINT>(rowStride * (extent.height / formatAttribs.blockHeight), D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
-    outBufferSize   = layerStride * extent.depth * numArrayLayers;
+    layerStride     = GetAlignedSize<UINT>(rowStride * (extent.y / formatAttribs.blockHeight), D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
+    outBufferSize   = layerStride * extent.z * numArrayLayers;
 }
 
 void D3D12Texture::CreateSubresourceCopyAsReadbackBuffer(
@@ -401,9 +401,9 @@ void D3D12Texture::CreateSubresourceCopyAsReadbackBuffer(
     {
         dstBufferFootprint.Offset               = 0;
         dstBufferFootprint.Footprint.Format     = DXTypes::ToDXGIFormatTypeless(DXTypes::ToDXGIFormat(format));
-        dstBufferFootprint.Footprint.Width      = extent.width;
-        dstBufferFootprint.Footprint.Height     = extent.height;
-        dstBufferFootprint.Footprint.Depth      = extent.depth;
+        dstBufferFootprint.Footprint.Width      = extent.x;
+        dstBufferFootprint.Footprint.Height     = extent.y;
+        dstBufferFootprint.Footprint.Depth      = extent.z;
         dstBufferFootprint.Footprint.RowPitch   = outRowStride;
     }
 
@@ -632,9 +632,9 @@ D3D12_TEXTURE_COPY_LOCATION D3D12Texture::CalcCopyLocation(ID3D12Resource* srcRe
         copyDesc.Type                                 = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
         copyDesc.PlacedFootprint.Offset               = srcOffset;
         copyDesc.PlacedFootprint.Footprint.Format     = GetDXFormat();
-        copyDesc.PlacedFootprint.Footprint.Width      = extent.width;
-        copyDesc.PlacedFootprint.Footprint.Height     = extent.height;
-        copyDesc.PlacedFootprint.Footprint.Depth      = extent.depth;
+        copyDesc.PlacedFootprint.Footprint.Width      = extent.x;
+        copyDesc.PlacedFootprint.Footprint.Height     = extent.y;
+        copyDesc.PlacedFootprint.Footprint.Depth      = extent.z;
         copyDesc.PlacedFootprint.Footprint.RowPitch   = rowPitch;
     }
     return copyDesc;
@@ -649,7 +649,7 @@ D3D12_BOX D3D12Texture::CalcRegion(const Offset3D& offset, const Extent3D& exten
         case TextureType::Texture1DArray:
             return CD3DX12_BOX(
                 offset.x,
-                offset.x + static_cast<LONG>(extent.width)
+                offset.x + static_cast<LONG>(extent.x)
             );
         case TextureType::Texture2D:
         case TextureType::TextureCube:
@@ -660,17 +660,17 @@ D3D12_BOX D3D12Texture::CalcRegion(const Offset3D& offset, const Extent3D& exten
             return CD3DX12_BOX(
                 offset.x,
                 offset.y,
-                offset.x + static_cast<LONG>(extent.width),
-                offset.y + static_cast<LONG>(extent.height)
+                offset.x + static_cast<LONG>(extent.x),
+                offset.y + static_cast<LONG>(extent.y)
             );
         case TextureType::Texture3D:
             return CD3DX12_BOX(
                 offset.x,
                 offset.y,
                 offset.z,
-                offset.x + static_cast<LONG>(extent.width),
-                offset.y + static_cast<LONG>(extent.height),
-                offset.z + static_cast<LONG>(extent.depth)
+                offset.x + static_cast<LONG>(extent.x),
+                offset.y + static_cast<LONG>(extent.y),
+                offset.z + static_cast<LONG>(extent.z)
             );
         default:
             return CD3DX12_BOX(0,0,0 , 0,0,0);

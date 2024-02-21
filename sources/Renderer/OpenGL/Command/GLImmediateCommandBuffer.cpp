@@ -182,7 +182,7 @@ void GLImmediateCommandBuffer::CopyTextureFromFramebuffer(
     const TextureRegion&    dstRegion,
     const Offset2D&         srcOffset)
 {
-    if (dstRegion.extent.depth != 1)
+    if (dstRegion.extent.z != 1)
         return /*GL_INVALID_VALUE*/;
 
     auto& dstTextureGL = LLGL_CAST(GLTexture&, dstTexture);
@@ -192,7 +192,7 @@ void GLImmediateCommandBuffer::CopyTextureFromFramebuffer(
         static_cast<GLint>(dstRegion.subresource.baseMipLevel),
         CalcTextureOffset(dstTexture.GetType(), dstRegion.offset, dstRegion.subresource.baseArrayLayer),
         srcOffset,
-        Extent2D{ dstRegion.extent.width, dstRegion.extent.height }
+        Extent2D{ dstRegion.extent.x, dstRegion.extent.y }
     );
 }
 

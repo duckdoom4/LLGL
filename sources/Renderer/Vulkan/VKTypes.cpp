@@ -408,7 +408,7 @@ VkOffset3D ToVkOffset(const Offset3D& offset)
 
 VkExtent3D ToVkExtent(const Extent3D& extent)
 {
-    return VkExtent3D{ extent.width, extent.height, extent.depth };
+    return VkExtent3D{ extent.x, extent.y, extent.z };
 }
 
 VkComponentSwizzle ToVkComponentSwizzle(const TextureSwizzle swizzle)

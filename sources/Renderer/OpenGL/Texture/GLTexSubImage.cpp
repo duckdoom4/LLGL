@@ -326,7 +326,7 @@ static void GLTexSubImage1D(const TextureRegion& region, const ImageView& imageV
     GLTexSubImage1D(
         region.subresource.baseMipLevel,
         region.offset.x,
-        region.extent.width,
+        region.extent.x,
         imageView,
         internalFormat
     );
@@ -340,8 +340,8 @@ static void GLTexSubImage2D(const TextureRegion& region, const ImageView& imageV
         region.subresource.baseMipLevel,
         region.offset.x,
         region.offset.y,
-        region.extent.width,
-        region.extent.height,
+        region.extent.x,
+        region.extent.y,
         imageView,
         internalFormat
     );
@@ -354,9 +354,9 @@ static void GLTexSubImage3D(const TextureRegion& region, const ImageView& imageV
         region.offset.x,
         region.offset.y,
         region.offset.z,
-        region.extent.width,
-        region.extent.height,
-        region.extent.depth,
+        region.extent.x,
+        region.extent.y,
+        region.extent.z,
         imageView,
         internalFormat
     );
@@ -368,8 +368,8 @@ static void GLTexSubImageCube(const TextureRegion& region, const ImageView& imag
         region.subresource.baseMipLevel,
         region.offset.x,
         region.offset.y,
-        region.extent.width,
-        region.extent.height,
+        region.extent.x,
+        region.extent.y,
         region.subresource.baseArrayLayer,
         imageView,
         internalFormat
@@ -384,7 +384,7 @@ static void GLTexSubImage1DArray(const TextureRegion& region, const ImageView& i
         region.subresource.baseMipLevel,
         region.offset.x,
         region.subresource.baseArrayLayer,
-        region.extent.width,
+        region.extent.x,
         region.subresource.numArrayLayers,
         imageView,
         internalFormat
@@ -400,8 +400,8 @@ static void GLTexSubImage2DArray(const TextureRegion& region, const ImageView& i
         region.offset.x,
         region.offset.y,
         region.subresource.baseArrayLayer,
-        region.extent.width,
-        region.extent.height,
+        region.extent.x,
+        region.extent.y,
         region.subresource.numArrayLayers,
         imageView,
         internalFormat
@@ -417,8 +417,8 @@ static void GLTexSubImageCubeArray(const TextureRegion& region, const ImageView&
         region.offset.x,
         region.offset.y,
         region.subresource.baseArrayLayer,
-        region.extent.width,
-        region.extent.height,
+        region.extent.x,
+        region.extent.y,
         region.subresource.numArrayLayers,
         imageView,
         internalFormat

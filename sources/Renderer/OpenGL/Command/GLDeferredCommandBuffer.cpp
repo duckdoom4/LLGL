@@ -235,7 +235,7 @@ void GLDeferredCommandBuffer::CopyTextureFromFramebuffer(
     const TextureRegion&    dstRegion,
     const Offset2D&         srcOffset)
 {
-    if (dstRegion.extent.depth != 1)
+    if (dstRegion.extent.z != 1)
         return /*GL_INVALID_VALUE*/;
 
     auto cmd = AllocCommand<GLCmdCopyFramebufferSubData>(GLOpcodeCopyFramebufferSubData);
@@ -244,8 +244,8 @@ void GLDeferredCommandBuffer::CopyTextureFromFramebuffer(
         cmd->dstLevel       = static_cast<GLint>(dstRegion.subresource.baseMipLevel);
         cmd->dstOffset      = CalcTextureOffset(dstTexture.GetType(), dstRegion.offset, dstRegion.subresource.baseArrayLayer);
         cmd->srcOffset      = srcOffset;
-        cmd->extent.width   = dstRegion.extent.width;
-        cmd->extent.height  = dstRegion.extent.height;
+        cmd->extent.x   = dstRegion.extent.x;
+        cmd->extent.y  = dstRegion.extent.y;
     }
 }
 

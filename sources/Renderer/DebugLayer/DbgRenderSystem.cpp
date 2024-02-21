@@ -895,63 +895,63 @@ void DbgRenderSystem::ValidateTextureDesc(const TextureDescriptor& textureDesc, 
     switch (textureDesc.type)
     {
         case TextureType::Texture1D:
-            Validate1DTextureSize(textureDesc.extent.width);
-            ValidateTextureSizePassiveDimension(textureDesc.extent.height, "1D", "Y");
-            ValidateTextureSizePassiveDimension(textureDesc.extent.depth, "1D", "Z");
+            Validate1DTextureSize(textureDesc.extent.x);
+            ValidateTextureSizePassiveDimension(textureDesc.extent.y, "1D", "Y");
+            ValidateTextureSizePassiveDimension(textureDesc.extent.z, "1D", "Z");
             break;
 
         case TextureType::Texture2D:
-            Validate2DTextureSize(textureDesc.extent.width);
-            Validate2DTextureSize(textureDesc.extent.height);
-            ValidateTextureSizePassiveDimension(textureDesc.extent.depth, "2D", "Z");
+            Validate2DTextureSize(textureDesc.extent.x);
+            Validate2DTextureSize(textureDesc.extent.y);
+            ValidateTextureSizePassiveDimension(textureDesc.extent.z, "2D", "Z");
             break;
 
         case TextureType::TextureCube:
             AssertCubeTextures();
-            ValidateCubeTextureSize(textureDesc.extent.width, textureDesc.extent.height);
-            ValidateTextureSizePassiveDimension(textureDesc.extent.depth, "cube", "Z");
+            ValidateCubeTextureSize(textureDesc.extent.x, textureDesc.extent.y);
+            ValidateTextureSizePassiveDimension(textureDesc.extent.z, "cube", "Z");
             break;
 
         case TextureType::Texture3D:
             Assert3DTextures();
-            Validate3DTextureSize(textureDesc.extent.width);
-            Validate3DTextureSize(textureDesc.extent.height);
-            Validate3DTextureSize(textureDesc.extent.depth);
+            Validate3DTextureSize(textureDesc.extent.x);
+            Validate3DTextureSize(textureDesc.extent.y);
+            Validate3DTextureSize(textureDesc.extent.z);
             break;
 
         case TextureType::Texture1DArray:
             AssertArrayTextures();
-            Validate1DTextureSize(textureDesc.extent.width);
-            ValidateTextureSizePassiveDimension(textureDesc.extent.height, "1D-array", "Y");
-            ValidateTextureSizePassiveDimension(textureDesc.extent.depth, "1D-array", "Z");
+            Validate1DTextureSize(textureDesc.extent.x);
+            ValidateTextureSizePassiveDimension(textureDesc.extent.y, "1D-array", "Y");
+            ValidateTextureSizePassiveDimension(textureDesc.extent.z, "1D-array", "Z");
             break;
 
         case TextureType::Texture2DArray:
             AssertArrayTextures();
-            Validate1DTextureSize(textureDesc.extent.width);
-            Validate1DTextureSize(textureDesc.extent.height);
-            ValidateTextureSizePassiveDimension(textureDesc.extent.depth, "2D-array", "Z");
+            Validate1DTextureSize(textureDesc.extent.x);
+            Validate1DTextureSize(textureDesc.extent.y);
+            ValidateTextureSizePassiveDimension(textureDesc.extent.z, "2D-array", "Z");
             break;
 
         case TextureType::TextureCubeArray:
             AssertCubeArrayTextures();
-            ValidateCubeTextureSize(textureDesc.extent.width, textureDesc.extent.height);
-            ValidateTextureSizePassiveDimension(textureDesc.extent.depth, "cube-array", "Z");
+            ValidateCubeTextureSize(textureDesc.extent.x, textureDesc.extent.y);
+            ValidateTextureSizePassiveDimension(textureDesc.extent.z, "cube-array", "Z");
             break;
 
         case TextureType::Texture2DMS:
             AssertMultiSampleTextures();
-            Validate2DTextureSize(textureDesc.extent.width);
-            Validate2DTextureSize(textureDesc.extent.height);
-            ValidateTextureSizePassiveDimension(textureDesc.extent.depth, "2DMS", "Z");
+            Validate2DTextureSize(textureDesc.extent.x);
+            Validate2DTextureSize(textureDesc.extent.y);
+            ValidateTextureSizePassiveDimension(textureDesc.extent.z, "2DMS", "Z");
             break;
 
         case TextureType::Texture2DMSArray:
             AssertMultiSampleTextures();
             AssertArrayTextures();
-            Validate2DTextureSize(textureDesc.extent.width);
-            Validate2DTextureSize(textureDesc.extent.height);
-            ValidateTextureSizePassiveDimension(textureDesc.extent.depth, "2DMS-array", "Z");
+            Validate2DTextureSize(textureDesc.extent.x);
+            Validate2DTextureSize(textureDesc.extent.y);
+            ValidateTextureSizePassiveDimension(textureDesc.extent.z, "2DMS-array", "Z");
             break;
 
         default:
@@ -1229,9 +1229,9 @@ void DbgRenderSystem::ValidateTextureRegion(const DbgTexture& textureDbg, const 
         return (offset >= 0 && static_cast<std::uint32_t>(offset) + extent > limit);
     };
 
-    if ( IsRegionOutside(textureRegion.offset.x, textureRegion.extent.width,  textureDbg.desc.extent.width ) ||
-         IsRegionOutside(textureRegion.offset.y, textureRegion.extent.height, textureDbg.desc.extent.height) ||
-         IsRegionOutside(textureRegion.offset.z, textureRegion.extent.depth,  textureDbg.desc.extent.depth ) )
+    if ( IsRegionOutside(textureRegion.offset.x, textureRegion.extent.x,  textureDbg.desc.extent.x ) ||
+         IsRegionOutside(textureRegion.offset.y, textureRegion.extent.y, textureDbg.desc.extent.y) ||
+         IsRegionOutside(textureRegion.offset.z, textureRegion.extent.z,  textureDbg.desc.extent.z ) )
     {
         LLGL_DBG_ERROR(ErrorType::UndefinedBehavior, "texture region exceeded size of texture");
     }

@@ -215,16 +215,16 @@ public:
             texDesc.format          = LLGL::Format::RGBA8UNorm;
             texDesc.bindFlags       = LLGL::BindFlags::Sampled | LLGL::BindFlags::ColorAttachment;
             texDesc.miscFlags       = LLGL::MiscFlags::NoInitialData;
-            texDesc.extent.width    = resolution.width;
-            texDesc.extent.height   = resolution.height;
+            texDesc.extent.x    = resolution.x;
+            texDesc.extent.y   = resolution.y;
             texDesc.mipLevels       = 1;
         }
         colorMap = renderer->CreateTexture(texDesc);
         glossMap = renderer->CreateTexture(texDesc);
 
         // Create empty blur pass maps (in quarter resolution)
-        texDesc.extent.width  /= 4;
-        texDesc.extent.height /= 4;
+        texDesc.extent.x  /= 4;
+        texDesc.extent.y /= 4;
 
         glossMapBlurX = renderer->CreateTexture(texDesc);
         glossMapBlurY = renderer->CreateTexture(texDesc);
@@ -256,8 +256,8 @@ public:
         renderTargetScene = renderer->CreateRenderTarget(renderTargetDesc);
 
         // Create render-target for horizontal blur pass (no depth buffer needed)
-        resolution.width    /= 4;
-        resolution.height   /= 4;
+        resolution.x    /= 4;
+        resolution.y   /= 4;
 
         LLGL::RenderTargetDescriptor renderTargetBlurXDesc;
         {
@@ -510,7 +510,7 @@ private:
         const auto screenSize = swapChain->GetResolution();
 
         const LLGL::Viewport viewportFull{ { 0, 0 }, screenSize };
-        const LLGL::Viewport viewportQuarter{ { 0, 0 }, { screenSize.width / 4, screenSize.height/ 4 } };
+        const LLGL::Viewport viewportQuarter{ { 0, 0 }, { screenSize.x / 4, screenSize.y/ 4 } };
 
         commands->Begin();
         {
@@ -572,7 +572,7 @@ private:
             commands->SetVertexBuffer(*vertexBufferNull);
 
             // Draw horizontal blur pass
-            SetBlurSettings({ 4.0f / static_cast<float>(screenSize.width), 0.0f });
+            SetBlurSettings({ 4.0f / static_cast<float>(screenSize.x), 0.0f });
             commands->BeginRenderPass(*renderTargetBlurX);
             {
                 // Draw blur passes in quarter resolution
@@ -586,7 +586,7 @@ private:
             commands->EndRenderPass();
 
             // Draw vertical blur pass
-            SetBlurSettings({ 0.0f, 4.0f / static_cast<float>(screenSize.height) });
+            SetBlurSettings({ 0.0f, 4.0f / static_cast<float>(screenSize.y) });
             commands->BeginRenderPass(*renderTargetBlurY);
             {
                 // Draw fullscreen triangle (triangle is spanned in the vertex shader)

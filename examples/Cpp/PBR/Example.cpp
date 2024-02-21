@@ -294,9 +294,9 @@ private:
         {
             texDesc.type            = texType;
             texDesc.format          = LLGL::Format::RGBA8UNorm;
-            texDesc.extent.width    = static_cast<std::uint32_t>(texWidth);
-            texDesc.extent.height   = static_cast<std::uint32_t>(texHeight);
-            texDesc.extent.depth    = 1;
+            texDesc.extent.x    = static_cast<std::uint32_t>(texWidth);
+            texDesc.extent.y   = static_cast<std::uint32_t>(texHeight);
+            texDesc.extent.z    = 1;
             texDesc.arrayLayers     = static_cast<std::uint32_t>(texFilenames.size());
         }
         auto tex = renderer->CreateTexture(texDesc, &srcImageView);

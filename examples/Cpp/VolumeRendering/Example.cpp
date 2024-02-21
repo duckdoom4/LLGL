@@ -145,7 +145,7 @@ private:
             texDesc.bindFlags   = LLGL::BindFlags::DepthStencilAttachment | LLGL::BindFlags::Sampled;
             texDesc.miscFlags   = LLGL::MiscFlags::NoInitialData;
             texDesc.format      = LLGL::Format::D32Float;
-            texDesc.extent      = { resolution.width, resolution.height, 1 };
+            texDesc.extent      = { resolution.x, resolution.y, 1 };
             texDesc.mipLevels   = 1;
         }
         depthRangeTexture = renderer->CreateTexture(texDesc);

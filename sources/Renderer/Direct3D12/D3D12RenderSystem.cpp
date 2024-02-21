@@ -251,7 +251,7 @@ void D3D12RenderSystem::ReadTexture(Texture& texture, const TextureRegion& textu
     const Format            format              = textureD3D.GetFormat();
     const FormatAttributes& formatAttribs       = GetFormatAttribs(format);
     const Extent3D          extent              = CalcTextureExtent(textureD3D.GetType(), textureRegion.extent);
-    const std::uint32_t     numTexelsPerLayer   = extent.width * extent.height * extent.depth;
+    const std::uint32_t     numTexelsPerLayer   = extent.x * extent.y * extent.z;
 
     void* mappedData = nullptr;
     HRESULT hr = readbackBuffer->Map(0, nullptr, &mappedData);
@@ -274,7 +274,7 @@ void D3D12RenderSystem::ReadTexture(Texture& texture, const TextureRegion& textu
     for_range(arrayLayer, textureRegion.subresource.numArrayLayers)
     {
         /* Copy CPU accessible buffer to output data */
-        RenderSystem::CopyTextureImageData(intermediateDstView, intermediateSrcView, numTexelsPerLayer, extent.width, rowStride);
+        RenderSystem::CopyTextureImageData(intermediateDstView, intermediateSrcView, numTexelsPerLayer, extent.x, rowStride);
 
         /* Move destination image pointer to next layer */
         intermediateDstView.data = reinterpret_cast<char*>(intermediateDstView.data) + layerSize;

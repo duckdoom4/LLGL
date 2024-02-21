@@ -226,7 +226,7 @@ void D3D11CommandBuffer::CopyBufferFromTexture(
         return;
 
     const auto& srcExtent = srcRegion.extent;
-    if (srcExtent.width == 0 || srcExtent.height == 0 || srcExtent.depth == 0)
+    if (srcExtent.x == 0 || srcExtent.y == 0 || srcExtent.z == 0)
         return;
 
     const UINT dstOffsetU32 = static_cast<UINT>(dstOffset);
@@ -247,12 +247,12 @@ void D3D11CommandBuffer::CopyBufferFromTexture(
     if (rowStride == 0 || layerStride == 0)
     {
         if (rowStride == 0)
-            rowStride = (srcExtent.width * formatAttribs.bitSize / 8);
+            rowStride = (srcExtent.x * formatAttribs.bitSize / 8);
         if (layerStride == 0)
-            layerStride = (srcExtent.height * rowStride);
+            layerStride = (srcExtent.y * rowStride);
     }
 
-    const std::uint32_t copySize = (layerStride * srcExtent.depth);
+    const std::uint32_t copySize = (layerStride * srcExtent.z);
 
     /* Create intermediate SRV for source texture (RWTexture1D/2D/3D) */
     const auto& subresource = srcRegion.subresource;
@@ -280,9 +280,9 @@ void D3D11CommandBuffer::CopyBufferFromTexture(
             static_cast<UINT>(srcOffset.x),
             static_cast<UINT>(srcOffset.y),
             static_cast<UINT>(srcOffset.z),
-            static_cast<UINT>(srcOffset.x) + srcExtent.width,
-            static_cast<UINT>(srcOffset.y) + srcExtent.height,
-            static_cast<UINT>(srcOffset.z) + srcExtent.depth
+            static_cast<UINT>(srcOffset.x) + srcExtent.x,
+            static_cast<UINT>(srcOffset.y) + srcExtent.y,
+            static_cast<UINT>(srcOffset.z) + srcExtent.z
         };
 
         for_range(i, subresource.numArrayLayers)
@@ -345,9 +345,9 @@ void D3D11CommandBuffer::CopyBufferFromTexture(
             cbufferData.texOffset[2]    = static_cast<std::uint32_t>(srcOffset.z);
         }
         cbufferData.bufOffset           = 0;
-        cbufferData.texExtent[0]        = srcExtent.width;
-        cbufferData.texExtent[1]        = srcExtent.height;
-        cbufferData.texExtent[2]        = srcExtent.depth;
+        cbufferData.texExtent[0]        = srcExtent.x;
+        cbufferData.texExtent[1]        = srcExtent.y;
+        cbufferData.texExtent[2]        = srcExtent.z;
         cbufferData.bufIndexStride      = std::max(4u, formatAttribs.bitSize / 8u);
         cbufferData.formatSize          = formatAttribs.bitSize / 8;
         cbufferData.components          = formatAttribs.components;
@@ -372,13 +372,13 @@ void D3D11CommandBuffer::CopyBufferFromTexture(
     switch (textureArrayType)
     {
         case TextureType::Texture1DArray:
-            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyBufferFromTexture1DCS, srcExtent.width, srcExtent.height, 1u);
+            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyBufferFromTexture1DCS, srcExtent.x, srcExtent.y, 1u);
             break;
         case TextureType::Texture2DArray:
-            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyBufferFromTexture2DCS, srcExtent.width, srcExtent.height, srcExtent.depth);
+            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyBufferFromTexture2DCS, srcExtent.x, srcExtent.y, srcExtent.z);
             break;
         case TextureType::Texture3D:
-            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyBufferFromTexture3DCS, srcExtent.width, srcExtent.height, srcExtent.depth);
+            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyBufferFromTexture3DCS, srcExtent.x, srcExtent.y, srcExtent.z);
             break;
         default:
             break;
@@ -514,7 +514,7 @@ void D3D11CommandBuffer::CopyTextureFromBuffer(
         return;
 
     const auto& dstExtent = dstRegion.extent;
-    if (dstExtent.width == 0 || dstExtent.height == 0 || dstExtent.depth == 0)
+    if (dstExtent.x == 0 || dstExtent.y == 0 || dstExtent.z == 0)
         return;
 
     const UINT srcOffsetU32 = static_cast<UINT>(srcOffset);
@@ -535,12 +535,12 @@ void D3D11CommandBuffer::CopyTextureFromBuffer(
     if (rowStride == 0 || layerStride == 0)
     {
         if (rowStride == 0)
-            rowStride = (dstExtent.width * formatAttribs.bitSize / 8);
+            rowStride = (dstExtent.x * formatAttribs.bitSize / 8);
         if (layerStride == 0)
-            layerStride = (dstExtent.height * rowStride);
+            layerStride = (dstExtent.y * rowStride);
     }
 
-    const std::uint32_t copySize = (layerStride * dstExtent.depth);
+    const std::uint32_t copySize = (layerStride * dstExtent.z);
 
     /* Create intermediate UAV for destination texture (RWTexture1D/2D/3D) */
     const auto& subresource = dstRegion.subresource;
@@ -609,9 +609,9 @@ void D3D11CommandBuffer::CopyTextureFromBuffer(
             cbufferData.texOffset[2]    = static_cast<std::uint32_t>(dstOffset.z);
         }
         cbufferData.bufOffset           = 0;
-        cbufferData.texExtent[0]        = dstExtent.width;
-        cbufferData.texExtent[1]        = dstExtent.height;
-        cbufferData.texExtent[2]        = dstExtent.depth;
+        cbufferData.texExtent[0]        = dstExtent.x;
+        cbufferData.texExtent[1]        = dstExtent.y;
+        cbufferData.texExtent[2]        = dstExtent.z;
         cbufferData.bufIndexStride      = std::max(4u, formatAttribs.bitSize / 8u);
         cbufferData.formatSize          = formatAttribs.bitSize / 8;
         cbufferData.components          = formatAttribs.components;
@@ -636,13 +636,13 @@ void D3D11CommandBuffer::CopyTextureFromBuffer(
     switch (textureArrayType)
     {
         case TextureType::Texture1DArray:
-            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyTexture1DFromBufferCS, dstExtent.width, dstExtent.height, 1u);
+            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyTexture1DFromBufferCS, dstExtent.x, dstExtent.y, 1u);
             break;
         case TextureType::Texture2DArray:
-            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyTexture2DFromBufferCS, dstExtent.width, dstExtent.height, dstExtent.depth);
+            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyTexture2DFromBufferCS, dstExtent.x, dstExtent.y, dstExtent.z);
             break;
         case TextureType::Texture3D:
-            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyTexture3DFromBufferCS, dstExtent.width, dstExtent.height, dstExtent.depth);
+            stateMngr_->DispatchBuiltin(D3D11BuiltinShader::CopyTexture3DFromBufferCS, dstExtent.x, dstExtent.y, dstExtent.z);
             break;
         default:
             break;
@@ -656,7 +656,7 @@ void D3D11CommandBuffer::CopyTextureFromBuffer(
     if (useIntermediateTexture)
     {
         const UINT      mipLevel    = subresource.baseMipLevel;
-        const D3D11_BOX srcBox      = { 0, 0, 0, dstExtent.width, dstExtent.height, dstExtent.depth };
+        const D3D11_BOX srcBox      = { 0, 0, 0, dstExtent.x, dstExtent.y, dstExtent.z };
 
         for_range(i, subresource.numArrayLayers)
         {
@@ -680,7 +680,7 @@ void D3D11CommandBuffer::CopyTextureFromFramebuffer(
     const TextureRegion&    dstRegion,
     const Offset2D&         srcOffset)
 {
-    if (dstRegion.extent.depth != 1 ||
+    if (dstRegion.extent.z != 1 ||
         dstRegion.offset.x < 0      ||
         dstRegion.offset.y < 0      ||
         dstRegion.offset.z < 0)
@@ -701,8 +701,8 @@ void D3D11CommandBuffer::CopyTextureFromFramebuffer(
         static_cast<UINT>(srcOffset.x),
         static_cast<UINT>(srcOffset.y),
         0u,
-        static_cast<UINT>(srcOffset.x) + dstRegion.extent.width,
-        static_cast<UINT>(srcOffset.y) + dstRegion.extent.height,
+        static_cast<UINT>(srcOffset.x) + dstRegion.extent.x,
+        static_cast<UINT>(srcOffset.y) + dstRegion.extent.y,
         1u,
     };
 

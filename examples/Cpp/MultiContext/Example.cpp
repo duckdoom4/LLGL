@@ -71,8 +71,8 @@ int main(int argc, char* argv[])
             const int scale = static_cast<int>(display->GetScale());
             const LLGL::Offset2D desktopCenter
             {
-                static_cast<int>(desktopResolution.width)/scale/2,
-                static_cast<int>(desktopResolution.height)/scale/2
+                static_cast<int>(desktopResolution.x)/scale/2,
+                static_cast<int>(desktopResolution.y)/scale/2
             };
 
             window1.SetPosition({ desktopCenter.x - 700, desktopCenter.y - 480/2 });
@@ -221,8 +221,8 @@ int main(int argc, char* argv[])
         auto BuildViewports = [](const LLGL::SwapChain& swapChain, LLGL::Viewport (&outViewports)[2])
         {
             const LLGL::Extent2D swapChainRes = swapChain.GetResolution();
-            const float w = static_cast<float>(swapChainRes.width);
-            const float h = static_cast<float>(swapChainRes.height);
+            const float w = static_cast<float>(swapChainRes.x);
+            const float h = static_cast<float>(swapChainRes.y);
             outViewports[0] = LLGL::Viewport{ 0.0f, 0.0f, w/2, h };
             outViewports[1] = LLGL::Viewport{  w/2, 0.0f, w/2, h };
         };

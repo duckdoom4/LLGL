@@ -1557,7 +1557,7 @@ void GLStateManager::BindRenderTarget(RenderTarget& renderTarget, GLStateManager
         /* Bind FBO, and notify new render target height */
         auto& renderTargetGL = LLGL_CAST(GLRenderTarget&, renderTarget);
         BindGLRenderTarget(&renderTargetGL);
-        ResetFramebufferHeight(static_cast<GLint>(renderTargetGL.GetResolution().height));
+        ResetFramebufferHeight(static_cast<GLint>(renderTargetGL.GetResolution().y));
     }
 }
 

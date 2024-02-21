@@ -130,7 +130,7 @@ static void BlitFramebufferLinear(GLint srcWidth, GLint srcHeight, GLint dstWidt
 static void GenerateMipsRangeTexture1D(const Extent3D& extent, GLuint texID, GLint baseMipLevel, GLint numMipLevels)
 {
     /* Get extent of base MIP level */
-    GLint srcWidth = static_cast<GLint>(extent.width);
+    GLint srcWidth = static_cast<GLint>(extent.x);
 
     GLint dstWidth = srcWidth;
 
@@ -151,8 +151,8 @@ static void GenerateMipsRangeTexture1D(const Extent3D& extent, GLuint texID, GLi
 static void GenerateMipsRangeTexture2D(const Extent3D& extent, GLuint texID, GLenum texTarget, GLint baseMipLevel, GLint numMipLevels)
 {
     /* Get extent of base MIP level */
-    GLint srcWidth  = static_cast<GLint>(extent.width);
-    GLint srcHeight = static_cast<GLint>(extent.height);
+    GLint srcWidth  = static_cast<GLint>(extent.x);
+    GLint srcHeight = static_cast<GLint>(extent.y);
 
     GLint dstWidth  = srcWidth;
     GLint dstHeight = srcHeight;
@@ -176,8 +176,8 @@ static void GenerateMipsRangeTexture2D(const Extent3D& extent, GLuint texID, GLe
 static void GenerateMipsRangeTextureLayer(const Extent3D& extent, GLuint texID, GLint baseMipLevel, GLint numMipLevels, GLint arrayLayer)
 {
     /* Get extent of base MIP level */
-    GLint srcWidth  = static_cast<GLint>(extent.width);
-    GLint srcHeight = static_cast<GLint>(extent.height);
+    GLint srcWidth  = static_cast<GLint>(extent.x);
+    GLint srcHeight = static_cast<GLint>(extent.y);
 
     GLint dstWidth  = srcWidth;
     GLint dstHeight = srcHeight;

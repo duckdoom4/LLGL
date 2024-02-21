@@ -101,7 +101,7 @@ class LLGL_EXPORT Window : public Surface
     public:
 
         //! Releases the internal data.
-        ~Window();
+        ~Window() override;
 
         /* --- Common --- */
 
@@ -155,7 +155,7 @@ class LLGL_EXPORT Window : public Surface
         bool AdaptForVideoMode(Extent2D* resolution, bool* fullscreen) override;
 
         //! Searches the entire list of displays until a display is found where more than the half of this window's client area is visible.
-        Display* FindResidentDisplay() const override final;
+        Display* FindResidentDisplay() const final;
 
     public:
 
@@ -240,7 +240,7 @@ class LLGL_EXPORT Window : public Surface
         struct Pimpl;
         Pimpl* pimpl_;
 
-};
+    };
 
 
 } // /namespace LLGL

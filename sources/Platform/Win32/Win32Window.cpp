@@ -101,8 +101,8 @@ static Offset2D GetScreenCenteredPosition(const Extent2D& size)
 {
     return
     {
-        GetSystemMetrics(SM_CXSCREEN)/2 - static_cast<int>(size.width/2),
-        GetSystemMetrics(SM_CYSCREEN)/2 - static_cast<int>(size.height/2)
+        GetSystemMetrics(SM_CXSCREEN)/2 - static_cast<int>(size.x/2),
+        GetSystemMetrics(SM_CYSCREEN)/2 - static_cast<int>(size.y/2)
     };
 }
 
@@ -114,14 +114,14 @@ static Win32FrameAndStyle GetWin32FrameAndStyleFromDesc(const WindowDescriptor& 
     frame.style = GetWindowStyle(desc);
 
     auto rc = GetClientArea(
-        static_cast<LONG>(desc.size.width),
-        static_cast<LONG>(desc.size.height),
+        static_cast<LONG>(desc.size.x),
+        static_cast<LONG>(desc.size.y),
         frame.style
     );
 
     /* Setup window size */
-    frame.size.width   = static_cast<std::uint32_t>(rc.right - rc.left);
-    frame.size.height  = static_cast<std::uint32_t>(rc.bottom - rc.top);
+    frame.size.x   = static_cast<std::uint32_t>(rc.right - rc.left);
+    frame.size.y  = static_cast<std::uint32_t>(rc.bottom - rc.top);
 
     /* Setup window position */
     const bool isCentered = ((desc.flags & WindowFlags::Centered) != 0);
@@ -202,8 +202,8 @@ void Win32Window::SetSize(const Extent2D& size, bool useClientArea)
     if (useClientArea)
     {
         auto rc = GetClientArea(
-            static_cast<LONG>(size.width),
-            static_cast<LONG>(size.height),
+            static_cast<LONG>(size.x),
+            static_cast<LONG>(size.y),
             GetWindowLong(wnd_, GWL_STYLE)
         );
         cx = rc.right - rc.left;
@@ -211,8 +211,8 @@ void Win32Window::SetSize(const Extent2D& size, bool useClientArea)
     }
     else
     {
-        cx = static_cast<int>(size.width);
-        cy = static_cast<int>(size.height);
+        cx = static_cast<int>(size.x);
+        cy = static_cast<int>(size.y);
     }
 
     SetWindowPos(wnd_, HWND_TOP, 0, 0, cx, cy, (SWP_NOMOVE | SWP_NOZORDER));
@@ -332,7 +332,7 @@ void Win32Window::SetDesc(const WindowDescriptor& desc)
     auto size               = GetSize();
 
     bool positionChanged    = (desc.position.x != position.x || desc.position.y != position.y);
-    bool sizeChanged        = (desc.size.width != size.width || desc.size.height != size.height);
+    bool sizeChanged        = (desc.size.x != size.x || desc.size.y != size.y);
 
     if (haveFlagsChanged || positionChanged || sizeChanged)
     {
@@ -371,8 +371,8 @@ void Win32Window::SetDesc(const WindowDescriptor& desc)
             0, // ignore, due to SWP_NOZORDER flag
             frame.position.x,
             frame.position.y,
-            static_cast<int>(frame.size.width),
-            static_cast<int>(frame.size.height),
+            static_cast<int>(frame.size.x),
+            static_cast<int>(frame.size.y),
             flags
         );
     }
@@ -413,8 +413,8 @@ HWND Win32Window::CreateWindowHandle(const WindowDescriptor& desc)
         frame.style,
         frame.position.x,
         frame.position.y,
-        static_cast<int>(frame.size.width),
-        static_cast<int>(frame.size.height),
+        static_cast<int>(frame.size.x),
+        static_cast<int>(frame.size.y),
         parentWndOrDesktop,
         nullptr,
         GetModuleHandle(nullptr),

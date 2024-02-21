@@ -81,8 +81,8 @@ void GLFramebufferCapture::CaptureFramebuffer(
 
     const GLTextureTarget   target          = GLStateManager::GetTextureTarget(type);
     const GLenum            targetGL        = GLTypes::Map(type);
-    const GLsizei           width           = static_cast<GLsizei>(extent.width);
-    const GLsizei           height          = static_cast<GLsizei>(extent.height);
+    const GLsizei           width           = static_cast<GLsizei>(extent.x);
+    const GLsizei           height          = static_cast<GLsizei>(extent.y);
     const GLenum            attachment      = (isDepthStencil ? GL_DEPTH_STENCIL_ATTACHMENT : GL_COLOR_ATTACHMENT0);
     const GLbitfield        bitmask         = (isDepthStencil ? GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT : GL_COLOR_BUFFER_BIT);
 

@@ -504,8 +504,8 @@ static std::vector<VideoAdapterOutputInfo> GetDXGIAdapterOutputInfos(IDXGIAdapte
         {
             DisplayMode displayMode;
             {
-                displayMode.resolution.width    = modeDesc[i].Width;
-                displayMode.resolution.height   = modeDesc[i].Height;
+                displayMode.resolution.x    = modeDesc[i].Width;
+                displayMode.resolution.y   = modeDesc[i].Height;
                 displayMode.refreshRate         = (modeDesc[i].RefreshRate.Denominator > 0 ? modeDesc[i].RefreshRate.Numerator / modeDesc[i].RefreshRate.Denominator : 0);
             }
             videoOutput.displayModes.push_back(displayMode);

@@ -144,7 +144,7 @@ private:
 
         // Create constant buffer and initialize world-view-projection (WVP) matrix for 2D drawing
         const LLGL::Extent2D& res = swapChain->GetResolution();
-        settings.wvpMatrix = Gs::ProjectionMatrix4f::Planar(static_cast<float>(res.width), static_cast<float>(res.height));
+        settings.wvpMatrix = Gs::ProjectionMatrix4f::Planar(static_cast<float>(res.x), static_cast<float>(res.y));
         constantBuffer = CreateConstantBuffer(settings);
 
         return vertexFormat;
@@ -192,8 +192,8 @@ private:
         // Store size and inverse size of glyph texture
         glyphTextureExtent = glyphTexture->GetMipExtent(0);
 
-        settings.glyphTextureInvSize[0] = 1.0f / static_cast<float>(glyphTextureExtent.width);
-        settings.glyphTextureInvSize[1] = 1.0f / static_cast<float>(glyphTextureExtent.height);
+        settings.glyphTextureInvSize[0] = 1.0f / static_cast<float>(glyphTextureExtent.x);
+        settings.glyphTextureInvSize[1] = 1.0f / static_cast<float>(glyphTextureExtent.y);
 
         // Create default linear sampler state
         linearSampler = renderer->CreateSampler(LLGL::Parse("filter.mip=none"));
@@ -344,7 +344,7 @@ private:
             x -= GetTextWidth(text);
 
         if ((flags & DrawCenteredY) != 0)
-            y -= static_cast<int>(glyphTextureExtent.height / 2);
+            y -= static_cast<int>(glyphTextureExtent.y / 2);
 
         if ((flags & DrawShadow) != 0)
         {
@@ -397,7 +397,7 @@ private:
             fontFlags |= DrawShadow;
 
         // Draw headline
-        const int screenWidth   = static_cast<int>(res.width);
+        const int screenWidth   = static_cast<int>(res.x);
         const int screenCenterX = screenWidth / 2;
 
         constexpr int textMargin        = FONTS_TEXT_MARGIN;
@@ -491,7 +491,7 @@ private:
 
             // Update constant buffer
             const auto& res = swapChain->GetResolution();
-            settings.wvpMatrix = Gs::ProjectionMatrix4f::Planar(static_cast<float>(res.width), static_cast<float>(res.height));
+            settings.wvpMatrix = Gs::ProjectionMatrix4f::Planar(static_cast<float>(res.x), static_cast<float>(res.y));
             commands->UpdateBuffer(*constantBuffer, 0, &settings, sizeof(settings));
 
             commands->BeginRenderPass(*swapChain);

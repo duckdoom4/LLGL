@@ -156,8 +156,8 @@ static bool ParseWindowSize(LLGL::Extent2D& size, int argc, char* argv[])
                 tok = ::strtok(nullptr, "x");
             }
 
-            size.width  = static_cast<std::uint32_t>(std::max(1, std::min(values[0], 16384)));
-            size.height = static_cast<std::uint32_t>(std::max(1, std::min(values[1], 16384)));
+            size.x  = static_cast<std::uint32_t>(std::max(1, std::min(values[0], 16384)));
+            size.y = static_cast<std::uint32_t>(std::max(1, std::min(values[1], 16384)));
 
             return true;
         }
@@ -226,7 +226,7 @@ ExampleBase::WindowEventHandler::WindowEventHandler(ExampleBase& app, LLGL::Swap
 
 void ExampleBase::WindowEventHandler::OnResize(LLGL::Window& sender, const LLGL::Extent2D& clientAreaSize)
 {
-    if (clientAreaSize.width >= 4 && clientAreaSize.height >= 4)
+    if (clientAreaSize.x >= 4 && clientAreaSize.y >= 4)
     {
         const auto& resolution = clientAreaSize;
 
@@ -234,7 +234,7 @@ void ExampleBase::WindowEventHandler::OnResize(LLGL::Window& sender, const LLGL:
         swapChain_->ResizeBuffers(resolution);
 
         // Update projection matrix
-        auto aspectRatio = static_cast<float>(resolution.width) / static_cast<float>(resolution.height);
+        auto aspectRatio = static_cast<float>(resolution.x) / static_cast<float>(resolution.y);
         projection_ = app_.PerspectiveProjection(aspectRatio, 0.1f, 100.0f, Gs::Deg2Rad(45.0f));
 
         // Notify application about resize event
@@ -277,7 +277,7 @@ void ExampleBase::CanvasEventHandler::OnResize(LLGL::Canvas& /*sender*/, const L
     swapChain_->ResizeBuffers(clientAreaSize);
 
     // Update projection matrix
-    auto aspectRatio = static_cast<float>(clientAreaSize.width) / static_cast<float>(clientAreaSize.height);
+    auto aspectRatio = static_cast<float>(clientAreaSize.x) / static_cast<float>(clientAreaSize.y);
     projection_ = app_.PerspectiveProjection(aspectRatio, 0.1f, 100.0f, Gs::Deg2Rad(45.0f));
 
     // Notify application about resize event
@@ -410,8 +410,8 @@ void ExampleBase::DrawFrame()
 
 static LLGL::Extent2D ScaleResolution(const LLGL::Extent2D& res, float scale)
 {
-    const float wScaled = static_cast<float>(res.width) * scale;
-    const float hScaled = static_cast<float>(res.height) * scale;
+    const float wScaled = static_cast<float>(res.x) * scale;
+    const float hScaled = static_cast<float>(res.y) * scale;
     return LLGL::Extent2D
     {
         static_cast<std::uint32_t>(wScaled + 0.5f),
@@ -488,7 +488,7 @@ ExampleBase::ExampleBase(const LLGL::UTF8String& title)
     std::cout << "  shading language:   " << info.shadingLanguageName << std::endl;
     std::cout << std::endl;
     std::cout << "swap-chain:" << std::endl;
-    std::cout << "  resolution:         " << swapChainRes.width << " x " << swapChainRes.height << std::endl;
+    std::cout << "  resolution:         " << swapChainRes.x << " x " << swapChainRes.y << std::endl;
     std::cout << "  samples:            " << swapChain->GetSamples() << std::endl;
     std::cout << "  colorFormat:        " << LLGL::ToString(swapChain->GetColorFormat()) << std::endl;
     std::cout << "  depthStencilFormat: " << LLGL::ToString(swapChain->GetDepthStencilFormat()) << std::endl;
@@ -782,7 +782,7 @@ bool SaveTextureWithRenderer(LLGL::RenderSystem& renderSys, LLGL::Texture& textu
     #endif
 
     // Read texture image data
-    std::vector<LLGL::ColorRGBAub> imageBuffer(texSize.width * texSize.height);
+    std::vector<LLGL::ColorRGBAub> imageBuffer(texSize.x * texSize.y);
     renderSys.ReadTexture(
         texture,
         LLGL::TextureRegion
@@ -803,11 +803,11 @@ bool SaveTextureWithRenderer(LLGL::RenderSystem& renderSys, LLGL::Texture& textu
     // Save image data to file (using STBI library, see https://github.com/nothings/stb)
     auto result = stbi_write_png(
         filename.c_str(),
-        static_cast<int>(texSize.width),
-        static_cast<int>(texSize.height),
+        static_cast<int>(texSize.x),
+        static_cast<int>(texSize.y),
         4,
         imageBuffer.data(),
-        static_cast<int>(texSize.width)*4
+        static_cast<int>(texSize.x)*4
     );
 
     if (!result)
@@ -841,15 +841,15 @@ LLGL::Texture* ExampleBase::CaptureFramebuffer(LLGL::CommandBuffer& commandBuffe
     {
         texDesc.type            = LLGL::TextureType::Texture2D;
         texDesc.bindFlags       = LLGL::BindFlags::CopyDst;
-        texDesc.extent.width    = resolution.width;
-        texDesc.extent.height   = resolution.height;
+        texDesc.extent.x    = resolution.x;
+        texDesc.extent.y   = resolution.y;
     }
     LLGL::Texture* tex = renderer->CreateTexture(texDesc);
 
     // Capture framebuffer
     LLGL::TextureRegion region;
     {
-        region.extent = LLGL::Extent3D{ resolution.width, resolution.height, 1u };
+        region.extent = LLGL::Extent3D{ resolution.x, resolution.y, 1u };
     }
     commandBuffer.CopyTextureFromFramebuffer(*tex, region, LLGL::Offset2D{ 0, 0 });
 
@@ -859,7 +859,7 @@ LLGL::Texture* ExampleBase::CaptureFramebuffer(LLGL::CommandBuffer& commandBuffe
 float ExampleBase::GetAspectRatio() const
 {
     const auto resolution = swapChain->GetResolution();
-    return (static_cast<float>(resolution.width) / static_cast<float>(resolution.height));
+    return (static_cast<float>(resolution.x) / static_cast<float>(resolution.y));
 }
 
 bool ExampleBase::IsOpenGL() const

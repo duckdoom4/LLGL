@@ -97,7 +97,7 @@ void Image::Resize(const Extent3D& extent)
 {
     /* Allocate new image buffer or release it if the extent is zero */
     extent_ = extent;
-    if (extent.width > 0 && extent.height > 0 && extent.depth > 0)
+    if (extent.x > 0 && extent.y > 0 && extent.z > 0)
         data_ = DynamicByteArray{ GetDataSize(), UninitializeTag{} };
     else
         data_.clear();
@@ -130,9 +130,9 @@ void Image::Resize(const Extent3D& extent, const ColorRGBAf& fillColor, const Of
         prevImage.dataType_ = GetDataType();
         prevImage.data_     = std::move(data_);
 
-        if ( extent.width  > GetExtent().width  ||
-             extent.height > GetExtent().height ||
-             extent.depth  > GetExtent().depth )
+        if ( extent.x  > GetExtent().x  ||
+             extent.y > GetExtent().y ||
+             extent.z  > GetExtent().z )
         {
             /* Resize image buffer with fill color */
             extent_ = extent;
@@ -232,9 +232,9 @@ static bool Overlap3DRegion(const Offset3D& dstOffset, const Offset3D& srcOffset
 {
     return
     (
-        Overlap1DRegion(dstOffset.x, srcOffset.x, extent.width ) &&
-        Overlap1DRegion(dstOffset.y, srcOffset.y, extent.height) &&
-        Overlap1DRegion(dstOffset.z, srcOffset.z, extent.depth )
+        Overlap1DRegion(dstOffset.x, srcOffset.x, extent.x ) &&
+        Overlap1DRegion(dstOffset.y, srcOffset.y, extent.y) &&
+        Overlap1DRegion(dstOffset.z, srcOffset.z, extent.z )
     );
 }
 
@@ -246,9 +246,9 @@ void Image::Blit(Offset3D dstRegionOffset, const Image& srcImage, Offset3D srcRe
         srcImage.ClampRegion(srcRegionOffset, srcRegionExtent);
 
         /* Then shift negative destination region */
-        if ( ShiftNegative1DRegion(dstRegionOffset.x, GetExtent().width,  srcRegionOffset.x, srcRegionExtent.width ) &&
-             ShiftNegative1DRegion(dstRegionOffset.y, GetExtent().height, srcRegionOffset.y, srcRegionExtent.height) &&
-             ShiftNegative1DRegion(dstRegionOffset.z, GetExtent().depth,  srcRegionOffset.z, srcRegionExtent.depth ) )
+        if ( ShiftNegative1DRegion(dstRegionOffset.x, GetExtent().x,  srcRegionOffset.x, srcRegionExtent.x ) &&
+             ShiftNegative1DRegion(dstRegionOffset.y, GetExtent().y, srcRegionOffset.y, srcRegionExtent.y) &&
+             ShiftNegative1DRegion(dstRegionOffset.z, GetExtent().z,  srcRegionOffset.z, srcRegionExtent.z ) )
         {
             /* Check if a temporary copy of the source image must be allocated */
             Image srcImageTemp;
@@ -268,12 +268,12 @@ void Image::Blit(Offset3D dstRegionOffset, const Image& srcImage, Offset3D srcRe
             CopyImageBufferRegion(
                 GetMutableView(),
                 dstRegionOffset,
-                dstExtent.width,
-                dstExtent.width * dstExtent.height,
+                dstExtent.x,
+                dstExtent.x * dstExtent.y,
                 srcImageRef->GetView(),
                 srcRegionOffset,
-                srcExtent.width,
-                srcExtent.width * srcExtent.height,
+                srcExtent.x,
+                srcExtent.x * srcExtent.y,
                 srcRegionExtent
             );
         }
@@ -282,7 +282,7 @@ void Image::Blit(Offset3D dstRegionOffset, const Image& srcImage, Offset3D srcRe
 
 static std::size_t GetRequiredImageDataSize(const Extent3D& extent, const ImageFormat format, const DataType dataType)
 {
-    return GetMemoryFootprint(format, dataType, extent.width * extent.height * extent.depth);
+    return GetMemoryFootprint(format, dataType, extent.x * extent.y * extent.z);
 }
 
 static void ValidateImageDataSize(const Extent3D& extent, const MutableImageView& imageView)
@@ -318,15 +318,15 @@ void Image::ReadPixels(const Offset3D& offset, const Extent3D& extent, const Mut
 
         /* Get source image parameters */
         const std::uint32_t bpp             = GetBytesPerPixel();
-        const std::uint32_t srcRowStride    = bpp * GetExtent().width;
-        const std::uint32_t srcDepthStride  = srcRowStride * GetExtent().height;
+        const std::uint32_t srcRowStride    = bpp * GetExtent().x;
+        const std::uint32_t srcDepthStride  = srcRowStride * GetExtent().y;
         const char*         src             = data_.get() + GetDataPtrOffset(offset);
 
         if (GetFormat() == imageView.format && GetDataType() == imageView.dataType)
         {
             /* Get destination image parameters */
-            const std::uint32_t dstRowStride    = bpp * extent.width;
-            const std::uint32_t dstDepthStride  = dstRowStride * extent.height;
+            const std::uint32_t dstRowStride    = bpp * extent.x;
+            const std::uint32_t dstDepthStride  = dstRowStride * extent.y;
             char*               dst             = reinterpret_cast<char*>(imageView.data);
 
             /* Blit region into destination image */
@@ -365,15 +365,15 @@ void Image::WritePixels(const Offset3D& offset, const Extent3D& extent, const Im
 
         /* Get destination image parameters */
         const std::uint32_t bpp             = GetBytesPerPixel();
-        const std::uint32_t dstRowStride    = bpp * GetExtent().width;
-        const std::uint32_t dstDepthStride  = dstRowStride * GetExtent().height;
+        const std::uint32_t dstRowStride    = bpp * GetExtent().x;
+        const std::uint32_t dstDepthStride  = dstRowStride * GetExtent().y;
         char*               dst             = data_.get() + GetDataPtrOffset(offset);
 
         if (GetFormat() == imageView.format && GetDataType() == imageView.dataType)
         {
             /* Get source image parameters */
-            const std::uint32_t srcRowStride    = bpp * extent.width;
-            const std::uint32_t srcDepthStride  = srcRowStride * extent.height;
+            const std::uint32_t srcRowStride    = bpp * extent.x;
+            const std::uint32_t srcDepthStride  = srcRowStride * extent.y;
             const char*         src             = reinterpret_cast<const char*>(imageView.data);
 
             /* Blit source image into region */
@@ -435,12 +435,12 @@ std::uint32_t Image::GetBytesPerPixel() const
 
 std::uint32_t Image::GetRowStride() const
 {
-    return (GetBytesPerPixel() * GetExtent().width);
+    return (GetBytesPerPixel() * GetExtent().x);
 }
 
 std::uint32_t Image::GetDepthStride() const
 {
-    return (GetRowStride() * GetExtent().height);
+    return (GetRowStride() * GetExtent().y);
 }
 
 std::uint32_t Image::GetDataSize() const
@@ -450,7 +450,7 @@ std::uint32_t Image::GetDataSize() const
 
 std::uint32_t Image::GetNumPixels() const
 {
-    return (extent_.width * extent_.height * extent_.depth);
+    return (extent_.x * extent_.y * extent_.z);
 }
 
 static bool Is1DRegionValid(std::int32_t offset, std::uint32_t extent, std::uint32_t limit)
@@ -462,9 +462,9 @@ bool Image::IsRegionInside(const Offset3D& offset, const Extent3D& extent) const
 {
     return
     (
-        Is1DRegionValid(offset.x, extent.width , extent_.width ) &&
-        Is1DRegionValid(offset.y, extent.height, extent_.height) &&
-        Is1DRegionValid(offset.z, extent.depth , extent_.depth )
+        Is1DRegionValid(offset.x, extent.x , extent_.x ) &&
+        Is1DRegionValid(offset.y, extent.y, extent_.y) &&
+        Is1DRegionValid(offset.z, extent.z , extent_.z )
     );
 }
 
@@ -486,8 +486,8 @@ std::size_t Image::GetDataPtrOffset(const Offset3D& offset) const
     const std::size_t x     = static_cast<std::size_t>(offset.x);
     const std::size_t y     = static_cast<std::size_t>(offset.y);
     const std::size_t z     = static_cast<std::size_t>(offset.z);
-    const std::size_t w     = static_cast<std::size_t>(GetExtent().width);
-    const std::size_t h     = static_cast<std::size_t>(GetExtent().height);
+    const std::size_t w     = static_cast<std::size_t>(GetExtent().x);
+    const std::size_t h     = static_cast<std::size_t>(GetExtent().y);
     return (bpp * (x + (y + z * h) * w));
 }
 
@@ -497,9 +497,9 @@ void Image::ClampRegion(Offset3D& offset, Extent3D& extent) const
     offset.y        = std::max(offset.y, 0);
     offset.z        = std::max(offset.z, 0);
 
-    extent.width    = std::min(extent.width, GetExtent().width);
-    extent.height   = std::min(extent.height, GetExtent().height);
-    extent.depth    = std::min(extent.depth, GetExtent().depth);
+    extent.x    = std::min(extent.x, GetExtent().x);
+    extent.y   = std::min(extent.y, GetExtent().y);
+    extent.z    = std::min(extent.z, GetExtent().z);
 }
 
 

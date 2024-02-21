@@ -768,9 +768,9 @@ static std::size_t GetFlattenedImageBufferPosEnd(
 {
     /* Subtract 1 from extent dimensions and add <bpp> again to get the excluding iterator end */
     return GetFlattenedImageBufferPos(
-        static_cast<std::uint32_t>(offset.x) + extent.width  - 1u,
-        static_cast<std::uint32_t>(offset.y) + extent.height - 1u,
-        static_cast<std::uint32_t>(offset.z) + extent.depth  - 1u,
+        static_cast<std::uint32_t>(offset.x) + extent.x  - 1u,
+        static_cast<std::uint32_t>(offset.y) + extent.y - 1u,
+        static_cast<std::uint32_t>(offset.z) + extent.z  - 1u,
         rows,
         layers,
         bpp

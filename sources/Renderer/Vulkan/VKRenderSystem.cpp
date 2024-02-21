@@ -432,7 +432,7 @@ void VKRenderSystem::WriteTexture(Texture& texture, const TextureRegion& texture
     const Format                format          = VKTypes::Unmap(textureVK.GetVkFormat());
 
     VkImage                     image           = textureVK.GetVkImage();
-    const std::uint32_t         imageSize       = extent.width * extent.height * extent.depth * subresource.numArrayLayers;
+    const std::uint32_t         imageSize       = extent.x * extent.y * extent.z * subresource.numArrayLayers;
     const void*                 imageData       = nullptr;
     const VkDeviceSize          imageDataSize   = static_cast<VkDeviceSize>(GetMemoryFootprint(format, imageSize));
 
@@ -486,7 +486,7 @@ void VKRenderSystem::WriteTexture(Texture& texture, const TextureRegion& texture
             image,
             textureVK.GetVkFormat(),
             VkOffset3D{ offset.x, offset.y, offset.z },
-            VkExtent3D{ extent.width, extent.height, extent.depth },
+            VkExtent3D{ extent.x, extent.y, extent.z },
             subresource
         );
 
@@ -510,7 +510,7 @@ void VKRenderSystem::ReadTexture(Texture& texture, const TextureRegion& textureR
     const FormatAttributes&     formatAttribs   = GetFormatAttribs(format);
 
     VkImage                     image           = textureVK.GetVkImage();
-    const std::uint32_t         imageSize       = extent.width * extent.height * extent.depth * subresource.numArrayLayers;
+    const std::uint32_t         imageSize       = extent.x * extent.y * extent.z * subresource.numArrayLayers;
     const VkDeviceSize          imageDataSize   = static_cast<VkDeviceSize>(GetMemoryFootprint(format, imageSize));
 
     /* Create staging buffer */
@@ -528,7 +528,7 @@ void VKRenderSystem::ReadTexture(Texture& texture, const TextureRegion& textureR
             stagingBuffer.GetVkBuffer(),
             textureVK.GetVkFormat(),
             VkOffset3D{ offset.x, offset.y, offset.z },
-            VkExtent3D{ extent.width, extent.height, extent.depth },
+            VkExtent3D{ extent.x, extent.y, extent.z },
             subresource
         );
 
@@ -545,7 +545,7 @@ void VKRenderSystem::ReadTexture(Texture& texture, const TextureRegion& textureR
         {
             /* Copy data to buffer object */
             const ImageView srcImageView{ formatAttribs.format, formatAttribs.dataType, memory, static_cast<std::size_t>(imageDataSize) };
-            RenderSystem::CopyTextureImageData(dstImageView, srcImageView, imageSize, extent.width);
+            RenderSystem::CopyTextureImageData(dstImageView, srcImageView, imageSize, extent.x);
             deviceMemory->Unmap(device_);
         }
     }

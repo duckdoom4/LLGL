@@ -121,8 +121,8 @@ NullTexture* NullRenderTarget::MakeIntermediateAttachment(const Format format, s
         textureDesc.bindFlags       = BindFlags::ColorAttachment;
         textureDesc.miscFlags       = MiscFlags::FixedSamples;
         textureDesc.format          = format;
-        textureDesc.extent.width    = desc.resolution.width;
-        textureDesc.extent.height   = desc.resolution.height;
+        textureDesc.extent.x    = desc.resolution.x;
+        textureDesc.extent.y   = desc.resolution.y;
         textureDesc.mipLevels       = 1;
         textureDesc.samples         = samples;
     };

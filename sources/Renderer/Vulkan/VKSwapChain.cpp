@@ -220,8 +220,8 @@ void CopyVkImageRegion(TDst& outRegion, const TextureRegion& dstRegion, const Of
     outRegion.dstOffset.x                   = dstRegion.offset.x;
     outRegion.dstOffset.y                   = dstRegion.offset.y;
     outRegion.dstOffset.z                   = dstRegion.offset.z;
-    outRegion.extent.width                  = dstRegion.extent.width;
-    outRegion.extent.height                 = dstRegion.extent.height;
+    outRegion.extent.width                  = dstRegion.extent.x;
+    outRegion.extent.height                 = dstRegion.extent.y;
     outRegion.extent.depth                  = 1u;
 }
 
@@ -285,8 +285,8 @@ void VKSwapChain::CopyImage(
 bool VKSwapChain::ResizeBuffersPrimary(const Extent2D& resolution)
 {
     /* Check if new resolution would actually change the swap-chain extent */
-    if (swapChainExtent_.width  != resolution.width ||
-        swapChainExtent_.height != resolution.height)
+    if (swapChainExtent_.width  != resolution.x ||
+        swapChainExtent_.height != resolution.y)
     {
         /* Wait until graphics queue is idle before resources are destroyed and recreated */
         vkQueueWaitIdle(graphicsQueue_);
@@ -629,8 +629,8 @@ VkExtent2D VKSwapChain::PickSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCa
 {
     return VkExtent2D
     {
-        std::max(surfaceCaps.minImageExtent.width,  std::min(surfaceCaps.maxImageExtent.width,  resolution.width )),
-        std::max(surfaceCaps.minImageExtent.height, std::min(surfaceCaps.maxImageExtent.height, resolution.height))
+        std::max(surfaceCaps.minImageExtent.width,  std::min(surfaceCaps.maxImageExtent.width,  resolution.x )),
+        std::max(surfaceCaps.minImageExtent.height, std::min(surfaceCaps.maxImageExtent.height, resolution.y))
     };
 }
 

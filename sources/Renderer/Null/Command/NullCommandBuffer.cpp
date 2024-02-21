@@ -104,11 +104,11 @@ static Extent3D GetSubresourceExtent(TextureType type, const Extent3D& extent, s
     switch (type)
     {
         case TextureType::Texture1DArray:
-            return Extent3D{ extent.width, numArrayLayers, 1 };
+            return Extent3D{ extent.x, numArrayLayers, 1 };
         case TextureType::Texture2DArray:
         case TextureType::TextureCubeArray:
         case TextureType::Texture2DMSArray:
-            return Extent3D{ extent.width, extent.height, numArrayLayers };
+            return Extent3D{ extent.x, extent.y, numArrayLayers };
         default:
             return extent;
     }
@@ -136,9 +136,9 @@ void NullCommandBuffer::CopyBufferFromTexture(
         cmd->dstX           = dstOffset;
         cmd->dstY           = 0;
         cmd->dstZ           = 0;
-        cmd->width          = extent.width;
-        cmd->height         = extent.height;
-        cmd->depth          = extent.depth;
+        cmd->width          = extent.x;
+        cmd->height         = extent.y;
+        cmd->depth          = extent.z;
         cmd->rowStride      = rowStride;
         cmd->layerStride    = layerStride;
     }
@@ -175,9 +175,9 @@ void NullCommandBuffer::CopyTexture(
         cmd->dstX           = dstLocation.offset.x;
         cmd->dstY           = dstLocation.offset.y;
         cmd->dstZ           = dstLocation.offset.z;
-        cmd->width          = extent.width;
-        cmd->height         = extent.height;
-        cmd->depth          = extent.depth;
+        cmd->width          = extent.x;
+        cmd->height         = extent.y;
+        cmd->depth          = extent.z;
         cmd->rowStride      = 0;
         cmd->layerStride    = 0;
     }
@@ -205,9 +205,9 @@ void NullCommandBuffer::CopyTextureFromBuffer(
         cmd->dstX           = dstRegion.offset.x;
         cmd->dstY           = dstRegion.offset.y;
         cmd->dstZ           = dstRegion.offset.z;
-        cmd->width          = extent.width;
-        cmd->height         = extent.height;
-        cmd->depth          = extent.depth;
+        cmd->width          = extent.x;
+        cmd->height         = extent.y;
+        cmd->depth          = extent.z;
         cmd->rowStride      = rowStride;
         cmd->layerStride    = layerStride;
     }

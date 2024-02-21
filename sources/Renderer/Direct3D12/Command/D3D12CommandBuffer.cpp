@@ -147,7 +147,7 @@ void D3D12CommandBuffer::CopyBufferFromTexture(
     UINT alignedRowStride = rowStride;
     if (rowStride == 0)
     {
-        rowStride = static_cast<std::uint32_t>(GetMemoryFootprint(srcTextureD3D.GetFormat(), srcExtent.width));
+        rowStride = static_cast<std::uint32_t>(GetMemoryFootprint(srcTextureD3D.GetFormat(), srcExtent.x));
         alignedRowStride = GetAlignedSize<UINT>(rowStride, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
     }
 
@@ -157,7 +157,7 @@ void D3D12CommandBuffer::CopyBufferFromTexture(
     commandContext_.TransitionResource(dstBufferD3D.GetResource(), D3D12_RESOURCE_STATE_COPY_DEST);
     commandContext_.TransitionResource(srcTextureD3D.GetResource(), D3D12_RESOURCE_STATE_COPY_SOURCE, true);
     {
-        if (dstOffset % D3D12_TEXTURE_DATA_PITCH_ALIGNMENT != 0 || (alignedRowStride != rowStride && (srcExtent.height > 1 || srcExtent.depth > 1)))
+        if (dstOffset % D3D12_TEXTURE_DATA_PITCH_ALIGNMENT != 0 || (alignedRowStride != rowStride && (srcExtent.y > 1 || srcExtent.z > 1)))
         {
             /* Copy texture region into intermediate buffer with correct row stride */
             const UINT64 alignedBufferSize = GetAlignedImageSize<UINT64>(srcExtent, rowStride, alignedRowStride);
@@ -180,9 +180,9 @@ void D3D12CommandBuffer::CopyBufferFromTexture(
 
             /* Copy each row individually from intermediate buffer into destination buffer due to unalgined row pitch */
             UINT64 alignedOffset = 0;
-            for_range(z, srcExtent.depth)
+            for_range(z, srcExtent.z)
             {
-                for_range(y, srcExtent.height)
+                for_range(y, srcExtent.y)
                 {
                     commandList_->CopyBufferRegion(dstBufferD3D.GetNative(), dstOffset, alignedBuffer, alignedOffset, rowStride);
                     alignedOffset += alignedRowStride;
@@ -281,7 +281,7 @@ void D3D12CommandBuffer::CopyTextureFromBuffer(
     UINT alignedRowStride = rowStride;
     if (rowStride == 0)
     {
-        rowStride = static_cast<std::uint32_t>(GetMemoryFootprint(dstTextureD3D.GetFormat(), dstExtent.width));
+        rowStride = static_cast<std::uint32_t>(GetMemoryFootprint(dstTextureD3D.GetFormat(), dstExtent.x));
         alignedRowStride = GetAlignedSize<UINT>(rowStride, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
     }
 
@@ -291,7 +291,7 @@ void D3D12CommandBuffer::CopyTextureFromBuffer(
     commandContext_.TransitionResource(dstTextureD3D.GetResource(), D3D12_RESOURCE_STATE_COPY_DEST);
     commandContext_.TransitionResource(srcBufferD3D.GetResource(), D3D12_RESOURCE_STATE_COPY_SOURCE, true);
     {
-        if (srcOffset % D3D12_TEXTURE_DATA_PITCH_ALIGNMENT != 0 || (alignedRowStride != rowStride && (dstExtent.height > 1 || dstExtent.depth > 1)))
+        if (srcOffset % D3D12_TEXTURE_DATA_PITCH_ALIGNMENT != 0 || (alignedRowStride != rowStride && (dstExtent.y > 1 || dstExtent.z > 1)))
         {
             /* Copy texture region into intermediate buffer with correct row stride */
             const UINT64 alignedBufferSize = GetAlignedImageSize<UINT64>(dstExtent, rowStride, alignedRowStride);
@@ -301,9 +301,9 @@ void D3D12CommandBuffer::CopyTextureFromBuffer(
 
             /* Copy each row individually from intermediate buffer into destination texture due to unalgined row pitch */
             UINT64 alignedOffset = 0;
-            for_range(z, dstExtent.depth)
+            for_range(z, dstExtent.z)
             {
-                for_range(y, dstExtent.height)
+                for_range(y, dstExtent.y)
                 {
                     commandList_->CopyBufferRegion(alignedBuffer, alignedOffset, srcBufferD3D.GetNative(), srcOffset, rowStride);
                     alignedOffset += alignedRowStride;
@@ -349,7 +349,7 @@ void D3D12CommandBuffer::CopyTextureFromFramebuffer(
     const TextureRegion&    dstRegion,
     const Offset2D&         srcOffset)
 {
-    if (dstRegion.extent.depth != 1 ||
+    if (dstRegion.extent.z != 1 ||
         dstRegion.offset.x < 0      ||
         dstRegion.offset.y < 0      ||
         dstRegion.offset.z < 0)
@@ -370,8 +370,8 @@ void D3D12CommandBuffer::CopyTextureFromFramebuffer(
         static_cast<UINT>(srcOffset.x),
         static_cast<UINT>(srcOffset.y),
         0u,
-        static_cast<UINT>(srcOffset.x) + dstRegion.extent.width,
-        static_cast<UINT>(srcOffset.y) + dstRegion.extent.height,
+        static_cast<UINT>(srcOffset.x) + dstRegion.extent.x,
+        static_cast<UINT>(srcOffset.y) + dstRegion.extent.y,
         1u,
     };
 

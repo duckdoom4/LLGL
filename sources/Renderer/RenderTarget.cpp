@@ -21,8 +21,8 @@ namespace LLGL
 void RenderTarget::ValidateResolution(const Extent2D& attachmentResolution)
 {
     /* Validate texture attachment size */
-    if (attachmentResolution.width == 0 || attachmentResolution.height == 0)
-        LLGL_TRAP("invalid resolution of render tartget attachment: %ux%u", attachmentResolution.width, attachmentResolution.height);
+    if (attachmentResolution.x == 0 || attachmentResolution.y == 0)
+        LLGL_TRAP("invalid resolution of render tartget attachment: %ux%u", attachmentResolution.x, attachmentResolution.y);
 
     /* Check if size matches the current resolution */
     const Extent2D targetResolution = GetResolution();
@@ -30,8 +30,8 @@ void RenderTarget::ValidateResolution(const Extent2D& attachmentResolution)
     {
         LLGL_TRAP(
             "resolution mismatch of render target attachment: %ux%u is specified, but expected %ux%u",
-            attachmentResolution.width, attachmentResolution.height,
-            targetResolution.width, targetResolution.height
+            attachmentResolution.x, attachmentResolution.y,
+            targetResolution.x, targetResolution.y
         );
     }
 }
@@ -40,7 +40,7 @@ void RenderTarget::ValidateMipResolution(const Texture& texture, std::uint32_t m
 {
     /* Apply texture size to render target resolution */
     auto size = texture.GetMipExtent(mipLevel);
-    ValidateResolution({ size.width, size.height });
+    ValidateResolution({ size.x, size.y });
 }
 
 

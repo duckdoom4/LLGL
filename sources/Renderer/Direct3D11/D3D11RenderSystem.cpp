@@ -234,7 +234,7 @@ void D3D11RenderSystem::WriteTexture(Texture& texture, const TextureRegion& text
                 textureRegion.subresource.numArrayLayers,
                 D3D11Types::MakeD3D11Box(
                     textureRegion.offset.x,
-                    textureRegion.extent.width
+                    textureRegion.extent.x
                 ),
                 srcImageView,
                 &(GetMutableReport())
@@ -253,8 +253,8 @@ void D3D11RenderSystem::WriteTexture(Texture& texture, const TextureRegion& text
                 D3D11Types::MakeD3D11Box(
                     textureRegion.offset.x,
                     textureRegion.offset.y,
-                    textureRegion.extent.width,
-                    textureRegion.extent.height
+                    textureRegion.extent.x,
+                    textureRegion.extent.y
                 ),
                 srcImageView,
                 &(GetMutableReport())
@@ -276,9 +276,9 @@ void D3D11RenderSystem::WriteTexture(Texture& texture, const TextureRegion& text
                     textureRegion.offset.x,
                     textureRegion.offset.y,
                     textureRegion.offset.z,
-                    textureRegion.extent.width,
-                    textureRegion.extent.height,
-                    textureRegion.extent.depth
+                    textureRegion.extent.x,
+                    textureRegion.extent.y,
+                    textureRegion.extent.z
                 ),
                 srcImageView,
                 &(GetMutableReport())
@@ -297,7 +297,7 @@ void D3D11RenderSystem::ReadTexture(Texture& texture, const TextureRegion& textu
     /* Map subresource for reading */
     const Format            format              = textureD3D.GetFormat();
     const Extent3D          extent              = CalcTextureExtent(textureD3D.GetType(), textureRegion.extent);
-    const std::uint32_t     numTexelsPerLayer   = extent.width * extent.height * extent.depth;
+    const std::uint32_t     numTexelsPerLayer   = extent.x * extent.y * extent.z;
     const std::uint32_t     numTexelsTotal      = numTexelsPerLayer * textureRegion.subresource.numArrayLayers;
     const std::size_t       requiredImageSize   = GetMemoryFootprint(dstImageView.format, dstImageView.dataType, numTexelsTotal);
 
@@ -321,7 +321,7 @@ void D3D11RenderSystem::ReadTexture(Texture& texture, const TextureRegion& textu
 
         /* Copy host visible resource to CPU accessible resource */
         const ImageView intermediateSrcView{ formatAttribs.format, formatAttribs.dataType, mappedSubresource.pData, mappedSubresource.DepthPitch };
-        const std::size_t bytesWritten = RenderSystem::CopyTextureImageData(intermediateDstView, intermediateSrcView, numTexelsPerLayer, extent.width, mappedSubresource.RowPitch);
+        const std::size_t bytesWritten = RenderSystem::CopyTextureImageData(intermediateDstView, intermediateSrcView, numTexelsPerLayer, extent.x, mappedSubresource.RowPitch);
 
         /* Unmap resource */
         context_->Unmap(texCopy.resource.Get(), subresource);
@@ -824,7 +824,7 @@ static void InitializeD3DColorTextureWithUploadBuffer(
         imageViewDefault.dataType   = formatDesc.dataType;
 
         /* Generate default image buffer */
-        const std::size_t   imageSize   = extent.width * extent.height * extent.depth;
+        const std::size_t   imageSize   = extent.x * extent.y * extent.z;
         DynamicByteArray    imageBuffer = GenerateImageBuffer(imageViewDefault.format, imageViewDefault.dataType, imageSize, clearValue.color);
 
         /* Update only the first MIP-map level for each array slice */
@@ -838,7 +838,7 @@ static void InitializeD3DColorTextureWithUploadBuffer(
                 /*mipLevel:*/       0,
                 /*baseArrayLayer:*/ layer,
                 /*numArrayLayers:*/ 1,
-                /*dstBox:*/         D3D11Types::MakeD3D11Box(0, 0, 0, extent.width, extent.height, extent.depth),
+                /*dstBox:*/         D3D11Types::MakeD3D11Box(0, 0, 0, extent.x, extent.y, extent.z),
                 /*imageView:*/      imageViewDefault
             );
             DXThrowIfFailed(hr, "in 'InitializeD3DColorTextureWithUploadBuffer': LLGL::D3D11Texture::UpdateSubresource failed");
@@ -859,7 +859,7 @@ void D3D11RenderSystem::InitializeGpuTexture(
             /*mipLevel:*/       0,
             /*baseArrayLayer:*/ 0,
             /*numArrayLayers:*/ textureDesc.arrayLayers,
-            /*dstBox:*/         D3D11Types::MakeD3D11Box(0, 0, 0, textureDesc.extent.width, textureDesc.extent.height, textureDesc.extent.depth),
+            /*dstBox:*/         D3D11Types::MakeD3D11Box(0, 0, 0, textureDesc.extent.x, textureDesc.extent.y, textureDesc.extent.z),
             /*imageView:*/      *initialImage,
             /*report:*/         &(GetMutableReport())
         );

@@ -27,8 +27,8 @@ LLGL_EXPORT void BitBlit(
     std::uint32_t   srcRowStride,
     std::uint32_t   srcLayerStride)
 {
-    const std::uint32_t rowLength   = bpp * extent.width;
-    const std::uint32_t layerLength = rowLength * extent.height;
+    const std::uint32_t rowLength   = bpp * extent.x;
+    const std::uint32_t layerLength = rowLength * extent.y;
 
     /* Clamp strides to tightly packed lengths */
     dstRowStride = std::max(dstRowStride, rowLength);
@@ -42,12 +42,12 @@ LLGL_EXPORT void BitBlit(
         if (srcLayerStride == dstLayerStride && layerLength == dstLayerStride)
         {
             /* Copy region directly into output data */
-            ::memcpy(dst, src, layerLength * extent.depth);
+            ::memcpy(dst, src, layerLength * extent.z);
         }
         else
         {
             /* Copy region directly into output data */
-            for_range(z, extent.depth)
+            for_range(z, extent.z)
             {
                 /* Copy current slice */
                 ::memcpy(dst, src, layerLength);
@@ -61,14 +61,14 @@ LLGL_EXPORT void BitBlit(
     else
     {
         /* Adjust depth strides */
-        dstLayerStride -= dstRowStride * extent.height;
-        srcLayerStride -= srcRowStride * extent.height;
+        dstLayerStride -= dstRowStride * extent.y;
+        srcLayerStride -= srcRowStride * extent.y;
 
         /* Copy region directly into output data */
-        for_range(z, extent.depth)
+        for_range(z, extent.z)
         {
             /* Copy current slice */
-            for_range(y, extent.height)
+            for_range(y, extent.y)
             {
                 /* Copy current row */
                 ::memcpy(dst, src, rowLength);

@@ -47,15 +47,15 @@ struct MonitorChangedInfo
 
 static void Convert(DisplayMode& dst, const DEVMODE& src)
 {
-    dst.resolution.width    = static_cast<std::uint32_t>(src.dmPelsWidth);
-    dst.resolution.height   = static_cast<std::uint32_t>(src.dmPelsHeight);
+    dst.resolution.x    = static_cast<std::uint32_t>(src.dmPelsWidth);
+    dst.resolution.y   = static_cast<std::uint32_t>(src.dmPelsHeight);
     dst.refreshRate         = static_cast<std::uint32_t>(src.dmDisplayFrequency);
 }
 
 static void Convert(DEVMODE& dst, const DisplayMode& src)
 {
-    dst.dmPelsWidth         = static_cast<DWORD>(src.resolution.width);
-    dst.dmPelsHeight        = static_cast<DWORD>(src.resolution.height);
+    dst.dmPelsWidth         = static_cast<DWORD>(src.resolution.x);
+    dst.dmPelsHeight        = static_cast<DWORD>(src.resolution.y);
     dst.dmDisplayFrequency  = static_cast<DWORD>(src.refreshRate);
 }
 

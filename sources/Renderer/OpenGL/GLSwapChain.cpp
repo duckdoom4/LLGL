@@ -51,7 +51,7 @@ GLSwapChain::GLSwapChain(
     Cache resolution height after surface has been created,
     since high-resolution displays might provide a multiple of the input size.
     */
-    framebufferHeight_ = static_cast<GLint>(GetResolution().height);
+    framebufferHeight_ = static_cast<GLint>(GetResolution().y);
 
     /* Create platform dependent OpenGL context */
     context_ = contextMngr.AllocContext(&pixelFormat, &GetSurface());
@@ -126,7 +126,7 @@ bool GLSwapChain::ResizeBuffersPrimary(const Extent2D& resolution)
     swapChainContext_->Resize(resolution);
 
     /* Update context height */
-    const GLint height = static_cast<GLint>(resolution.height);
+    const GLint height = static_cast<GLint>(resolution.y);
     GetStateManager().ResetFramebufferHeight(height);
     framebufferHeight_ = height;
 

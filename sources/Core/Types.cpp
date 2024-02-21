@@ -41,8 +41,8 @@ LLGL_EXPORT Extent2D operator + (const Extent2D& lhs, const Extent2D& rhs)
 {
     return Extent2D
     {
-        AddUInt32Clamped(lhs.width , rhs.width ),
-        AddUInt32Clamped(lhs.height, rhs.height)
+        AddUInt32Clamped(lhs.x , rhs.x ),
+        AddUInt32Clamped(lhs.y, rhs.y)
     };
 }
 
@@ -50,8 +50,8 @@ LLGL_EXPORT Extent2D operator - (const Extent2D& lhs, const Extent2D& rhs)
 {
     return Extent2D
     {
-        SubUInt32Clamped(lhs.width , rhs.width ),
-        SubUInt32Clamped(lhs.height, rhs.height)
+        SubUInt32Clamped(lhs.x , rhs.x ),
+        SubUInt32Clamped(lhs.y, rhs.y)
     };
 }
 
@@ -59,9 +59,9 @@ LLGL_EXPORT Extent3D operator + (const Extent3D& lhs, const Extent3D& rhs)
 {
     return Extent3D
     {
-        AddUInt32Clamped(lhs.width , rhs.width ),
-        AddUInt32Clamped(lhs.height, rhs.height),
-        AddUInt32Clamped(lhs.depth , rhs.depth )
+        AddUInt32Clamped(lhs.x , rhs.x ),
+        AddUInt32Clamped(lhs.y, rhs.y),
+        AddUInt32Clamped(lhs.z , rhs.z )
     };
 }
 
@@ -69,9 +69,9 @@ LLGL_EXPORT Extent3D operator - (const Extent3D& lhs, const Extent3D& rhs)
 {
     return Extent3D
     {
-        SubUInt32Clamped(lhs.width , rhs.width ),
-        SubUInt32Clamped(lhs.height, rhs.height),
-        SubUInt32Clamped(lhs.depth , rhs.depth )
+        SubUInt32Clamped(lhs.x , rhs.x ),
+        SubUInt32Clamped(lhs.y, rhs.y),
+        SubUInt32Clamped(lhs.z , rhs.z )
     };
 }
 

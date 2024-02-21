@@ -29,13 +29,13 @@ struct LLGL_EXPORT Extent2D
     Extent2D(const Extent2D&) = default;
 
     inline Extent2D(std::uint32_t width, std::uint32_t height) :
-        width  { width  },
-        height { height }
+        x  { width  },
+        y { height }
     {
     }
 
-    std::uint32_t width     = 0; //!< Extent X axis, i.e. width.
-    std::uint32_t height    = 0; //!< Extent Y axis, i.e. height.
+    std::uint32_t x     = 0; //!< Extent X axis, i.e. width.
+    std::uint32_t y    = 0; //!< Extent Y axis, i.e. height.
 };
 
 /**
@@ -48,15 +48,15 @@ struct LLGL_EXPORT Extent3D
     Extent3D(const Extent3D&) = default;
 
     inline Extent3D(std::uint32_t width, std::uint32_t height, std::uint32_t depth) :
-        width  { width  },
-        height { height },
-        depth  { depth  }
+        x  { width  },
+        y { height },
+        z  { depth  }
     {
     }
 
-    std::uint32_t width     = 0; //!< Extent X axis, i.e. width.
-    std::uint32_t height    = 0; //!< Extent Y axis, i.e. height.
-    std::uint32_t depth     = 0; //!< Extent Z axis, i.e. depth.
+    std::uint32_t x     = 0; //!< Extent X axis, i.e. width.
+    std::uint32_t y    = 0; //!< Extent Y axis, i.e. height.
+    std::uint32_t z     = 0; //!< Extent Z axis, i.e. depth.
 };
 
 /**
@@ -188,7 +188,7 @@ inline bool operator != (const Offset3D& lhs, const Offset3D& rhs)
 //! Returns true if the left hand side extent 'lhs' is equal to the right hand side extent 'rhs'.
 inline bool operator == (const Extent2D& lhs, const Extent2D& rhs)
 {
-    return (lhs.width == rhs.width && lhs.height == rhs.height);
+    return (lhs.x == rhs.x && lhs.y == rhs.y);
 }
 
 //! Returns true if the left hand side extent 'lhs' is unequal to the right hand side extent 'rhs'.
@@ -200,7 +200,7 @@ inline bool operator != (const Extent2D& lhs, const Extent2D& rhs)
 //! Returns true if the left hand side extent 'lhs' is equal to the right hand side extent 'rhs'.
 inline bool operator == (const Extent3D& lhs, const Extent3D& rhs)
 {
-    return (lhs.width == rhs.width && lhs.height == rhs.height && lhs.depth == rhs.depth);
+    return (lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z);
 }
 
 //! Returns true if the left hand side extent 'lhs' is unequal to the right hand side extent 'rhs'.

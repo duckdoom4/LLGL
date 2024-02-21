@@ -65,7 +65,7 @@ class VKRenderTarget final : public RenderTarget
         // Returns the render target resolution as VkExtent2D.
         inline VkExtent2D GetVkExtent() const
         {
-            return { resolution_.width, resolution_.height };
+            return { resolution_.x, resolution_.y };
         }
 
     private:

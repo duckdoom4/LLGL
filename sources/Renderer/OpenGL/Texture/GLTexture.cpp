@@ -218,13 +218,13 @@ TextureDescriptor GLTexture::GetDesc() const
     {
         case TextureType::Texture1D:
         case TextureType::Texture1DArray:
-            texDesc.extent.width    = static_cast<std::uint32_t>(extent[0]);
+            texDesc.extent.x    = static_cast<std::uint32_t>(extent[0]);
             texDesc.arrayLayers     = static_cast<std::uint32_t>(extent[1]);
             break;
 
         case TextureType::TextureCube:
-            texDesc.extent.width    = static_cast<std::uint32_t>(extent[0]);
-            texDesc.extent.height   = static_cast<std::uint32_t>(extent[1]);
+            texDesc.extent.x    = static_cast<std::uint32_t>(extent[0]);
+            texDesc.extent.y   = static_cast<std::uint32_t>(extent[1]);
             texDesc.arrayLayers     = 6u;
             break;
 
@@ -234,15 +234,15 @@ TextureDescriptor GLTexture::GetDesc() const
         case TextureType::Texture2DMS:
         case TextureType::Texture2DMSArray:
             /* For cube array textures, depth extent can also be copied directly without transformation (no need to multiply by 6) */
-            texDesc.extent.width    = static_cast<std::uint32_t>(extent[0]);
-            texDesc.extent.height   = static_cast<std::uint32_t>(extent[1]);
+            texDesc.extent.x    = static_cast<std::uint32_t>(extent[0]);
+            texDesc.extent.y   = static_cast<std::uint32_t>(extent[1]);
             texDesc.arrayLayers     = static_cast<std::uint32_t>(extent[2]);
             break;
 
         case TextureType::Texture3D:
-            texDesc.extent.width    = static_cast<std::uint32_t>(extent[0]);
-            texDesc.extent.height   = static_cast<std::uint32_t>(extent[1]);
-            texDesc.extent.depth    = static_cast<std::uint32_t>(extent[2]);
+            texDesc.extent.x    = static_cast<std::uint32_t>(extent[0]);
+            texDesc.extent.y   = static_cast<std::uint32_t>(extent[1]);
+            texDesc.extent.z    = static_cast<std::uint32_t>(extent[2]);
             break;
     }
 
@@ -451,9 +451,9 @@ static void GLCopyImageSubData(
         dstOffsetGL.x,
         dstOffsetGL.y,
         dstOffsetGL.z,
-        static_cast<GLsizei>(extent.width),
-        static_cast<GLsizei>(extent.height),
-        static_cast<GLsizei>(extent.depth)
+        static_cast<GLsizei>(extent.x),
+        static_cast<GLsizei>(extent.y),
+        static_cast<GLsizei>(extent.z)
     );
 }
 
@@ -489,7 +489,7 @@ static void GLCopyTexSubImagePrimary(
                 dstOffset.x,
                 srcOffset.x,
                 0,
-                static_cast<GLsizei>(extent.width)
+                static_cast<GLsizei>(extent.x)
             );
             #endif
         }
@@ -497,7 +497,7 @@ static void GLCopyTexSubImagePrimary(
 
         case TextureType::Texture1DArray:
         {
-            for_range(y, extent.height)
+            for_range(y, extent.y)
             {
                 readFBO.Attach(srcTexture, srcLevel, srcOffset);
                 glCopyTexSubImage2D(
@@ -507,7 +507,7 @@ static void GLCopyTexSubImagePrimary(
                     dstOffset.y + y,
                     srcOffset.x,
                     0, // y
-                    static_cast<GLsizei>(extent.width),
+                    static_cast<GLsizei>(extent.x),
                     1 // height
                 );
                 srcOffset.y++;
@@ -526,15 +526,15 @@ static void GLCopyTexSubImagePrimary(
                 dstOffset.y,
                 srcOffset.x,
                 srcOffset.y,
-                static_cast<GLsizei>(extent.width),
-                static_cast<GLsizei>(extent.height)
+                static_cast<GLsizei>(extent.x),
+                static_cast<GLsizei>(extent.y)
             );
         }
         break;
 
         case TextureType::TextureCube:
         {
-            for_range(z, extent.depth)
+            for_range(z, extent.z)
             {
                 readFBO.Attach(srcTexture, srcLevel, srcOffset);
                 glCopyTexSubImage2D(
@@ -544,8 +544,8 @@ static void GLCopyTexSubImagePrimary(
                     dstOffset.y,
                     srcOffset.x,
                     srcOffset.y,
-                    static_cast<GLsizei>(extent.width),
-                    static_cast<GLsizei>(extent.height)
+                    static_cast<GLsizei>(extent.x),
+                    static_cast<GLsizei>(extent.y)
                 );
                 srcOffset.z++;
             }
@@ -557,7 +557,7 @@ static void GLCopyTexSubImagePrimary(
         case TextureType::Texture2DMSArray:
         case TextureType::TextureCubeArray:
         {
-            for_range(z, extent.depth)
+            for_range(z, extent.z)
             {
                 readFBO.Attach(srcTexture, srcLevel, srcOffset);
                 glCopyTexSubImage3D(
@@ -568,8 +568,8 @@ static void GLCopyTexSubImagePrimary(
                     dstOffset.z + z,
                     srcOffset.x,
                     srcOffset.y,
-                    static_cast<GLsizei>(extent.width),
-                    static_cast<GLsizei>(extent.height)
+                    static_cast<GLsizei>(extent.x),
+                    static_cast<GLsizei>(extent.y)
                 );
                 srcOffset.z++;
             }
@@ -758,9 +758,9 @@ static void GLGetTextureSubImage(
         static_cast<GLint>(offset.x),
         static_cast<GLint>(offset.y),
         static_cast<GLint>(offset.z),
-        static_cast<GLsizei>(extent.width),
-        static_cast<GLsizei>(extent.height),
-        static_cast<GLsizei>(extent.depth),
+        static_cast<GLsizei>(extent.x),
+        static_cast<GLsizei>(extent.y),
+        static_cast<GLsizei>(extent.z),
         GLTypes::Map(dstImageView.format),
         GLTypes::Map(dstImageView.dataType),
         static_cast<GLsizei>(dstImageView.dataSize),
@@ -827,7 +827,7 @@ static void GLGetTextureImage(
     const GLint         mipLevel    = static_cast<GLint>(region.subresource.baseMipLevel);
     const Extent3D      mipExtent   = textureGL.GetMipExtent(region.subresource.baseMipLevel);
     const bool          useStaging  = (mipExtent != extent);
-    const std::uint32_t numTexels   = extent.width * extent.height * extent.depth;
+    const std::uint32_t numTexels   = extent.x * extent.y * extent.z;
 
     if (useStaging)
     {
@@ -1038,8 +1038,8 @@ void GLTexture::AllocRenderbufferStorage(const TextureDescriptor& textureDesc)
     GLRenderbuffer::AllocStorage(
         GetID(),
         GLTypes::Map(textureDesc.format),
-        static_cast<GLsizei>(textureDesc.extent.width),
-        static_cast<GLsizei>(textureDesc.extent.height),
+        static_cast<GLsizei>(textureDesc.extent.x),
+        static_cast<GLsizei>(textureDesc.extent.y),
         static_cast<GLsizei>(textureDesc.samples)
     );
 

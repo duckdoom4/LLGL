@@ -324,14 +324,14 @@ void DbgCommandBuffer::CopyTextureFromFramebuffer(
         ValidateTextureRegion(dstTextureDbg, dstRegion);
         if (dstRegion.subresource.numArrayLayers > 1)
             LLGL_DBG_ERROR(ErrorType::InvalidArgument, "cannot copy texture from framebuffer with number of array layers greater than 1");
-        if (dstRegion.extent.depth != 1)
-            LLGL_DBG_ERROR(ErrorType::InvalidArgument, "cannot copy texture from framebuffer with a depth extent of %u", dstRegion.extent.depth);
+        if (dstRegion.extent.z != 1)
+            LLGL_DBG_ERROR(ErrorType::InvalidArgument, "cannot copy texture from framebuffer with a depth extent of %u", dstRegion.extent.z);
         if (bindings_.swapChain != nullptr)
             bindings_.swapChain->NotifyFramebufferUsed();
         else
             LLGL_DBG_ERROR(ErrorType::InvalidState, "copy texture from framebuffer is only supported for SwapChain framebuffers");
         if (DbgRenderTarget* renderTargetDbg = bindings_.renderTarget)
-            ValidateRenderTargetRange(*renderTargetDbg, srcOffset, Extent2D{ dstRegion.extent.width, dstRegion.extent.height });
+            ValidateRenderTargetRange(*renderTargetDbg, srcOffset, Extent2D{ dstRegion.extent.x, dstRegion.extent.y });
     }
 
     LLGL_DBG_COMMAND( "CopyTextureFromFramebuffer", instance.CopyTextureFromFramebuffer(dstTextureDbg.instance, dstRegion, srcOffset) );
@@ -1885,14 +1885,14 @@ void DbgCommandBuffer::ValidateTextureRegion(DbgTexture& textureDbg, const Textu
     /* Validate extent and offset */
     const Extent3D mipExtent = textureDbg.GetMipExtent(region.subresource.baseMipLevel);
 
-    if (region.extent.width  == 0 ||
-        region.extent.height == 0 ||
-        region.extent.depth  == 0)
+    if (region.extent.x  == 0 ||
+        region.extent.y == 0 ||
+        region.extent.z  == 0)
     {
         LLGL_DBG_ERROR(
             ErrorType::InvalidArgument,
             "invalid texture region with zero extent (%u, %u, %u)",
-            region.extent.width, region.extent.height, region.extent.depth
+            region.extent.x, region.extent.y, region.extent.z
         );
     }
     else if (region.offset.x < 0 ||
@@ -1907,28 +1907,28 @@ void DbgCommandBuffer::ValidateTextureRegion(DbgTexture& textureDbg, const Textu
     }
     else
     {
-        if (static_cast<std::uint32_t>(region.offset.x) + region.extent.width > mipExtent.width)
+        if (static_cast<std::uint32_t>(region.offset.x) + region.extent.x > mipExtent.x)
         {
             LLGL_DBG_ERROR(
                 ErrorType::InvalidArgument,
                 "invalid texture region with X-range [%d, +%u) out of bounds [0, %u) for MIP-level %u",
-                region.offset.x, region.extent.width, mipExtent.width, region.subresource.baseMipLevel
+                region.offset.x, region.extent.x, mipExtent.x, region.subresource.baseMipLevel
             );
         }
-        if (static_cast<std::uint32_t>(region.offset.y) + region.extent.height > mipExtent.height)
+        if (static_cast<std::uint32_t>(region.offset.y) + region.extent.y > mipExtent.y)
         {
             LLGL_DBG_ERROR(
                 ErrorType::InvalidArgument,
                 "invalid texture region with Y-range [%d, +%u) out of bounds [0, %u) for MIP-level %u",
-                region.offset.y, region.extent.height, mipExtent.height, region.subresource.baseMipLevel
+                region.offset.y, region.extent.y, mipExtent.y, region.subresource.baseMipLevel
             );
         }
-        if (static_cast<std::uint32_t>(region.offset.z) + region.extent.depth > mipExtent.depth)
+        if (static_cast<std::uint32_t>(region.offset.z) + region.extent.z > mipExtent.z)
         {
             LLGL_DBG_ERROR(
                 ErrorType::InvalidArgument,
                 "invalid texture region with Z-range [%d, +%u) out of bounds [0, %u) for MIP-level %u",
-                region.offset.z, region.extent.depth, mipExtent.depth, region.subresource.baseMipLevel
+                region.offset.z, region.extent.z, mipExtent.z, region.subresource.baseMipLevel
             );
         }
     }
@@ -1949,7 +1949,7 @@ void DbgCommandBuffer::ValidateTextureBufferCopyStrides(DbgTexture& textureDbg, 
 {
     if (rowStride != 0)
     {
-        const std::size_t rowSize = GetMemoryFootprint(textureDbg.desc.format, extent.width);
+        const std::size_t rowSize = GetMemoryFootprint(textureDbg.desc.format, extent.x);
         if (rowStride < rowSize)
         {
             LLGL_DBG_ERROR(
@@ -2053,12 +2053,12 @@ void DbgCommandBuffer::ValidateRenderTargetRange(DbgRenderTarget& renderTargetDb
     /* Validate extent and offset */
     const Extent2D resolution = renderTargetDbg.GetResolution();
 
-    if (extent.width == 0 || extent.height == 0)
+    if (extent.x == 0 || extent.y == 0)
     {
         LLGL_DBG_ERROR(
             ErrorType::InvalidArgument,
             "invalid swap-chain region with zero extent (%u, %u)",
-            extent.width, extent.height
+            extent.x, extent.y
         );
     }
     else if (offset.x < 0 || offset.y < 0)
@@ -2071,20 +2071,20 @@ void DbgCommandBuffer::ValidateRenderTargetRange(DbgRenderTarget& renderTargetDb
     }
     else
     {
-        if (static_cast<std::uint32_t>(offset.x) + extent.width > resolution.width)
+        if (static_cast<std::uint32_t>(offset.x) + extent.x > resolution.x)
         {
             LLGL_DBG_ERROR(
                 ErrorType::InvalidArgument,
                 "invalid swap-chain region with X-range [%d, +%u) out of bounds [0, %u)",
-                offset.x, extent.width, resolution.width
+                offset.x, extent.x, resolution.x
             );
         }
-        if (static_cast<std::uint32_t>(offset.y) + extent.height > resolution.height)
+        if (static_cast<std::uint32_t>(offset.y) + extent.y > resolution.y)
         {
             LLGL_DBG_ERROR(
                 ErrorType::InvalidArgument,
                 "invalid swap-chain region with Y-range [%d, +%u) out of bounds [0, %u)",
-                offset.y, extent.height, resolution.height
+                offset.y, extent.y, resolution.y
             );
         }
     }
@@ -2297,12 +2297,12 @@ void DbgCommandBuffer::AssertInsideRenderPass()
 
 void DbgCommandBuffer::AssertGraphicsPipelineBound()
 {
-    (void)AssertAndGetGraphicsPSO();
+    AssertAndGetGraphicsPSO();
 }
 
 void DbgCommandBuffer::AssertComputePipelineBound()
 {
-    (void)AssertAndGetComputePSO();
+    AssertAndGetComputePSO();
 }
 
 void DbgCommandBuffer::AssertVertexBufferBound()

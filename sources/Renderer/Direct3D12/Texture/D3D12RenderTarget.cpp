@@ -332,8 +332,8 @@ D3D12Resource* D3D12RenderTarget::CreateInternalTexture(
     /* Create internal texture with sampling descriptor and single MIP-level */
     auto tex2DDesc = CD3DX12_RESOURCE_DESC::Tex2D(
         format,
-        resolution_.width,
-        resolution_.height,
+        resolution_.x,
+        resolution_.y,
         1, // arraySize
         1, // mipLevels
         sampleDesc_.Count,

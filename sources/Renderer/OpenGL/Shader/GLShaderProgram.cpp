@@ -811,9 +811,9 @@ static void GLQueryWorkGroupSize(GLuint program, ShaderReflection& reflection)
         glGetProgramiv(program, GL_COMPUTE_WORK_GROUP_SIZE, params);
         if (params[0] > 0 && params[1] > 0 && params[2] > 0)
         {
-            reflection.compute.workGroupSize.width  = static_cast<std::uint32_t>(params[0]);
-            reflection.compute.workGroupSize.height = static_cast<std::uint32_t>(params[1]);
-            reflection.compute.workGroupSize.depth  = static_cast<std::uint32_t>(params[2]);
+            reflection.compute.workGroupSize.x  = static_cast<std::uint32_t>(params[0]);
+            reflection.compute.workGroupSize.y = static_cast<std::uint32_t>(params[1]);
+            reflection.compute.workGroupSize.z  = static_cast<std::uint32_t>(params[2]);
         }
     }
     #endif // /GL_ARB_compute_shader

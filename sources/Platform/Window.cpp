@@ -153,21 +153,21 @@ Display* Window::FindResidentDisplay() const
 {
     const auto winPos   = GetPosition();
     const auto winSize  = GetSize();
-    const auto winArea  = static_cast<int>(winSize.width * winSize.height);
+    const auto winArea  = static_cast<int>(winSize.x * winSize.y);
 
     for (auto display : Display::GetList())
     {
         auto offset = display->GetOffset();
         auto extent = display->GetDisplayMode().resolution;
 
-        int scrX = static_cast<int>(extent.width);
-        int scrY = static_cast<int>(extent.height);
+        int scrX = static_cast<int>(extent.x);
+        int scrY = static_cast<int>(extent.y);
 
         /* Calculate window boundaries relative to the current display */
         int x1 = winPos.x - offset.x;
         int y1 = winPos.y - offset.y;
-        int x2 = x1 + static_cast<int>(winSize.width);
-        int y2 = y1 + static_cast<int>(winSize.height);
+        int x2 = x1 + static_cast<int>(winSize.x);
+        int y2 = y1 + static_cast<int>(winSize.y);
 
         /* Is window fully or partially inside the dispaly? */
         if (x2 >= 0 && x1 <= scrX &&

@@ -68,10 +68,10 @@ DynamicByteArray DecompressBC1ToRGBA8UNorm(
     unsigned        /*threadCount*/)
 {
     /* Return null on invalid arguments */
-    if (extent.width % 4 != 0 || extent.height % 4 != 0 || data == nullptr || dataSize < extent.width * extent.height / 2)
+    if (extent.x % 4 != 0 || extent.y % 4 != 0 || data == nullptr || dataSize < extent.x * extent.y / 2)
         return nullptr;
 
-    DynamicByteArray dstImage{ extent.width * extent.height * 4, UninitializeTag{} };
+    DynamicByteArray dstImage{ extent.x * extent.y * 4, UninitializeTag{} };
 
     std::uint8_t* output = reinterpret_cast<std::uint8_t*>(dstImage.get());
     std::uint16_t compressedColor[2];
@@ -79,9 +79,9 @@ DynamicByteArray DecompressBC1ToRGBA8UNorm(
 
     const std::size_t formatByteSize = 4;
 
-    for_range(y, extent.height / 4u)
+    for_range(y, extent.y / 4u)
     {
-        for_range(x, extent.width / 4u)
+        for_range(x, extent.x / 4u)
         {
             /* Decompress two 16 bit colors */
             for_range(i, 2)
@@ -107,7 +107,7 @@ DynamicByteArray DecompressBC1ToRGBA8UNorm(
                 palette >>= 2;
 
                 /* Write out image color */
-                const std::size_t outputOffset = (((y * 4 + i/4) * extent.width) + (x*4 + i%4)) * formatByteSize;
+                const std::size_t outputOffset = (((y * 4 + i/4) * extent.x) + (x*4 + i%4)) * formatByteSize;
                 output[outputOffset + 0] = decompressedColor[paletteIndex][0];
                 output[outputOffset + 1] = decompressedColor[paletteIndex][1];
                 output[outputOffset + 2] = decompressedColor[paletteIndex][2];

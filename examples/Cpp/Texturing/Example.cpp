@@ -186,8 +186,8 @@ public:
             }
 
             // MIP-maps of block compression must be a multiple of the block size, so we cannot go smaller
-            if (region.extent.width  >= formatDesc.blockWidth &&
-                region.extent.height >= formatDesc.blockHeight)
+            if (region.extent.x  >= formatDesc.blockWidth &&
+                region.extent.y >= formatDesc.blockHeight)
             {
                 // Write image data into MIP-map
                 renderer->WriteTexture(*colorMaps[0], region, imageReader.GetImageView(mipLevel));

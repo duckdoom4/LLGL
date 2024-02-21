@@ -76,9 +76,9 @@ Extent3D D3D11Texture::GetMipExtent(std::uint32_t mipLevel) const
 
                 if (mipLevel < desc.MipLevels)
                 {
-                    size.width  = std::max(1u, desc.Width >> mipLevel);
-                    size.height = desc.ArraySize;
-                    size.depth  = 1u;
+                    size.x  = std::max(1u, desc.Width >> mipLevel);
+                    size.y = desc.ArraySize;
+                    size.z  = 1u;
                 }
             }
             break;
@@ -91,9 +91,9 @@ Extent3D D3D11Texture::GetMipExtent(std::uint32_t mipLevel) const
 
                 if (mipLevel < desc.MipLevels)
                 {
-                    size.width  = std::max(1u, desc.Width  >> mipLevel);
-                    size.height = std::max(1u, desc.Height >> mipLevel);
-                    size.depth  = desc.ArraySize;
+                    size.x  = std::max(1u, desc.Width  >> mipLevel);
+                    size.y = std::max(1u, desc.Height >> mipLevel);
+                    size.z  = desc.ArraySize;
                 }
             }
             break;
@@ -106,9 +106,9 @@ Extent3D D3D11Texture::GetMipExtent(std::uint32_t mipLevel) const
 
                 if (mipLevel < desc.MipLevels)
                 {
-                    size.width  = std::max(1u, desc.Width  >> mipLevel);
-                    size.height = std::max(1u, desc.Height >> mipLevel);
-                    size.depth  = std::max(1u, desc.Depth  >> mipLevel);
+                    size.x  = std::max(1u, desc.Width  >> mipLevel);
+                    size.y = std::max(1u, desc.Height >> mipLevel);
+                    size.z  = std::max(1u, desc.Depth  >> mipLevel);
                 }
             }
             break;
@@ -405,9 +405,9 @@ void D3D11Texture::CreateSubresourceCopyWithCPUAccess(
         static_cast<UINT>(offset.x),
         static_cast<UINT>(offset.y),
         static_cast<UINT>(offset.z),
-        static_cast<UINT>(offset.x) + extent.width,
-        static_cast<UINT>(offset.y) + extent.height,
-        static_cast<UINT>(offset.z) + extent.depth,
+        static_cast<UINT>(offset.x) + extent.x,
+        static_cast<UINT>(offset.y) + extent.y,
+        static_cast<UINT>(offset.z) + extent.z,
     };
 
     const bool isDepthStencilOrMultisampled = ((GetBindFlags() & BindFlags::DepthStencilAttachment) != 0 || IsMultiSampleTexture(GetType()));
@@ -632,7 +632,7 @@ void D3D11Texture::CreateSubresourceCopyWithUIntFormat(
             /* Create temporary 1D texture with a similar descriptor */
             D3D11_TEXTURE1D_DESC desc;
             {
-                desc.Width          = region.extent.width;
+                desc.Width          = region.extent.x;
                 desc.MipLevels      = 1;
                 desc.ArraySize      = region.subresource.numArrayLayers;
                 desc.Format         = format;
@@ -650,8 +650,8 @@ void D3D11Texture::CreateSubresourceCopyWithUIntFormat(
             /* Query and modify descriptor for 2D texture */
             D3D11_TEXTURE2D_DESC desc;
             {
-                desc.Width          = region.extent.width;
-                desc.Height         = region.extent.height;
+                desc.Width          = region.extent.x;
+                desc.Height         = region.extent.y;
                 desc.MipLevels      = 1;
                 desc.ArraySize      = region.subresource.numArrayLayers;
                 desc.Format         = format;
@@ -670,9 +670,9 @@ void D3D11Texture::CreateSubresourceCopyWithUIntFormat(
             /* Query and modify descriptor for 3D texture */
             D3D11_TEXTURE3D_DESC desc;
             {
-                desc.Width          = region.extent.width;
-                desc.Height         = region.extent.height;
-                desc.Depth          = region.extent.depth;
+                desc.Width          = region.extent.x;
+                desc.Height         = region.extent.y;
+                desc.Depth          = region.extent.z;
                 desc.MipLevels      = 1;
                 desc.Format         = format;
                 desc.Usage          = D3D11_USAGE_DEFAULT;
@@ -705,7 +705,7 @@ void D3D11Texture::CreateSubresourceCopyWithUIntFormat(
 
     if (uavOutput != nullptr)
     {
-        const UINT numArrayLayersOrSlices = (subresourceType == TextureType::Texture3D ? region.extent.depth : region.subresource.numArrayLayers);
+        const UINT numArrayLayersOrSlices = (subresourceType == TextureType::Texture3D ? region.extent.z : region.subresource.numArrayLayers);
         CreateD3D11TextureSubresourceUAV(
             device,
             textureOutput.resource.Get(),
@@ -846,7 +846,7 @@ D3D11_BOX D3D11Texture::CalcRegion(const Offset3D& offset, const Extent3D& exten
                 static_cast<UINT>(offset.x),
                 0u,
                 0u,
-                static_cast<UINT>(offset.x) + extent.width,
+                static_cast<UINT>(offset.x) + extent.x,
                 1u,
                 1u
             };
@@ -862,8 +862,8 @@ D3D11_BOX D3D11Texture::CalcRegion(const Offset3D& offset, const Extent3D& exten
                 static_cast<UINT>(offset.x),
                 static_cast<UINT>(offset.y),
                 0u,
-                static_cast<UINT>(offset.x) + extent.width,
-                static_cast<UINT>(offset.y) + extent.height,
+                static_cast<UINT>(offset.x) + extent.x,
+                static_cast<UINT>(offset.y) + extent.y,
                 1u
             };
 
@@ -873,9 +873,9 @@ D3D11_BOX D3D11Texture::CalcRegion(const Offset3D& offset, const Extent3D& exten
                 static_cast<UINT>(offset.x),
                 static_cast<UINT>(offset.y),
                 static_cast<UINT>(offset.z),
-                static_cast<UINT>(offset.x) + extent.width,
-                static_cast<UINT>(offset.y) + extent.height,
-                static_cast<UINT>(offset.z) + extent.depth
+                static_cast<UINT>(offset.x) + extent.x,
+                static_cast<UINT>(offset.y) + extent.y,
+                static_cast<UINT>(offset.z) + extent.z
             };
 
         default:
@@ -906,7 +906,7 @@ void D3D11Texture::CreateTexture1D(
     /* Create native D3D texture */
     D3D11_TEXTURE1D_DESC descD3D;
     {
-        descD3D.Width           = desc.extent.width;
+        descD3D.Width           = desc.extent.x;
         descD3D.MipLevels       = NumMipLevels(desc);
         descD3D.ArraySize       = desc.arrayLayers;
         descD3D.Format          = SelectTextureDXGIFormat(desc);
@@ -930,8 +930,8 @@ void D3D11Texture::CreateTexture2D(
     /* Create native D3D texture */
     D3D11_TEXTURE2D_DESC descD3D;
     {
-        descD3D.Width               = desc.extent.width;
-        descD3D.Height              = desc.extent.height;
+        descD3D.Width               = desc.extent.x;
+        descD3D.Height              = desc.extent.y;
         descD3D.MipLevels           = NumMipLevels(desc);
         descD3D.ArraySize           = desc.arrayLayers;
         descD3D.Format              = SelectTextureDXGIFormat(desc);
@@ -957,9 +957,9 @@ void D3D11Texture::CreateTexture3D(
     /* Create native D3D texture */
     D3D11_TEXTURE3D_DESC descD3D;
     {
-        descD3D.Width           = desc.extent.width;
-        descD3D.Height          = desc.extent.height;
-        descD3D.Depth           = desc.extent.depth;
+        descD3D.Width           = desc.extent.x;
+        descD3D.Height          = desc.extent.y;
+        descD3D.Depth           = desc.extent.z;
         descD3D.MipLevels       = NumMipLevels(desc);
         descD3D.Format          = SelectTextureDXGIFormat(desc);
         descD3D.Usage           = DXGetTextureUsage(desc);
@@ -1019,7 +1019,7 @@ void D3D11Texture::CreateDefaultUAV(ID3D11Device* device)
 void D3D11Texture::SetResourceParams(DXGI_FORMAT format, const Extent3D& extent, UINT mipLevels, UINT arraySize)
 {
     format_         = format;
-    numMipLevels_   = (mipLevels == 0 ? NumMipLevels(extent.width, extent.height, extent.height) : mipLevels);
+    numMipLevels_   = (mipLevels == 0 ? NumMipLevels(extent.x, extent.y, extent.y) : mipLevels);
     numArrayLayers_ = arraySize;
 }
 
