@@ -194,7 +194,7 @@ class LLGL_EXPORT SwapChain : public RenderTarget
         \param[in] size Specifies the surface content size. This is only used if \c surface is null.
         Otherwise, the size is determined by the content size of the specified surface (i.e. with the Surface::GetContentSize function).
         \param[in] fullscreen Specifies whether to put the surface into fullscreen mode.
-        \param[in] windowContext Optional pointer to a NativeHandle structure. This is only used for desktop platforms.
+        \param[in] parentWnd Optional pointer to a NativeHandle structure. This is only used for desktop platforms.
         \see WindowDescriptor::windowContext
         \see Surface::GetContentSize
         \see SwitchFullscreenMode
@@ -203,7 +203,7 @@ class LLGL_EXPORT SwapChain : public RenderTarget
             const std::shared_ptr<Surface>& surface,
             const Extent2D&                 size,
             bool                            fullscreen,
-            const void*                     windowContext       = nullptr,
+            const void*                     parentWnd       = nullptr,
             std::size_t                     windowContextSize   = 0
         );
 

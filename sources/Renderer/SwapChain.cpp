@@ -148,7 +148,7 @@ void SwapChain::SetOrCreateSurface(
     const std::shared_ptr<Surface>& surface,
     const Extent2D&                 size,
     bool                            fullscreen,
-    const void*                     windowContext,
+    const void*                     parentWnd,
     std::size_t                     windowContextSize)
 {
     if (surface)
@@ -174,8 +174,7 @@ void SwapChain::SetOrCreateSurface(
         {
             windowDesc.size                 = size;
             windowDesc.flags                = (fullscreen ? WindowFlags::Borderless : WindowFlags::Centered) | WindowFlags::DisableSizeScaling;
-            windowDesc.windowContext        = windowContext;
-            windowDesc.windowContextSize    = windowContextSize;
+            windowDesc.parentWnd            = parentWnd;
         }
         pimpl_->surface = Window::Create(windowDesc);
 

@@ -100,8 +100,7 @@ MyRenderer::MyRenderer(
         windowDesc.position             = subWindowOffset;
         windowDesc.size                 = subWindowSize;
         windowDesc.flags                = (LLGL::WindowFlags::Visible | LLGL::WindowFlags::Borderless);
-        windowDesc.windowContext        = mainWindowHandle;
-        windowDesc.windowContextSize    = sizeof(mainWindowHandle);
+        windowDesc.parentWnd            = mainWindowHandle;
     }
     subWindow = LLGL::Window::Create(windowDesc);
 

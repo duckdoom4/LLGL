@@ -71,15 +71,6 @@ struct WindowFlags
         AcceptDropFiles         = (1 << 4),
 
         /**
-        \brief Specifies not to clear the content of the window when it is resized.
-        \remarks This is used by Win32 to erase (\c WM_ERASEBKGND message) or keep the background on a window resize.
-        It is recommended to enable this flag alongside \c Resizable when such a Window is re-drawn during the \c OnResize event to avoid flickering.
-        \note Only supported on: MS/Windows.
-        \see Window::EventListener::OnResize
-        */
-        DisableClearOnResize    = (1 << 5),
-
-        /**
         \brief Specifies not to multiply the window size by the backing scale factor.
         \remarks This is to control whether to transform the size from window coordinates into screen resolution coordinates.
         \note Only supported on: macOS and iOS.
@@ -96,7 +87,7 @@ struct WindowFlags
 struct WindowDescriptor
 {
     //! Window title in UTF-8 encoding.
-    UTF8String      title;
+    std::string      title;
 
     //! Window position (relative to the client area).
     Offset2D        position;
@@ -117,24 +108,16 @@ struct WindowDescriptor
 
     /**
     \brief Window context handle.
-    \remarks If used, this must be casted from a platform specific structure:
+    \remarks If used, this must be cast from a platform specific structure:
     \code
     #include <LLGL/Platform/NativeHandle.h>
     //...
     LLGL::NativeHandle myParentWindowHandle;
     myParentWindow->GetNativeHandle(&myParentWindowHandle, sizeof(myParentWindowHandle));
     windowDesc.windowContext        = &myParentWindowHandle;
-    windowDesc.windowContextSize    = sizeof(myParentWindowHandle);
     \endcode
     */
-    const void*     windowContext       = nullptr;
-
-    /**
-    \brief Specifies the size (in bytes) of the data type windowContext points to.
-    \remarks If windowContext is non-null, this must be equal to <code>sizeof(LLGL::NativeHandle)</code>.
-    \see windowContext
-    */
-    std::size_t     windowContextSize   = 0;
+    const void*     parentWnd       = nullptr;
 };
 
 

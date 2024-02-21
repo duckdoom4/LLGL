@@ -47,14 +47,6 @@ class Win32Window final : public Window
 
         void SetDesc(const WindowDescriptor& desc) override;
 
-    public:
-
-        // Returns true if the WM_ERASEBKGND must be skipped.
-        inline bool SkipMsgERASEBKGND() const
-        {
-            return ((desc_.flags & WindowFlags::DisableClearOnResize) != 0);
-        }
-
     private:
 
         HWND CreateWindowHandle(const WindowDescriptor& desc);

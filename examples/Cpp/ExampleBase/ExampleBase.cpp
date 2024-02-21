@@ -522,7 +522,7 @@ ExampleBase::ExampleBase(const LLGL::UTF8String& title)
 
     // Change window descriptor to allow resizing
     LLGL::WindowDescriptor wndDesc = window.GetDesc();
-    wndDesc.flags |= LLGL::WindowFlags::Resizable | LLGL::WindowFlags::DisableClearOnResize;
+    wndDesc.flags |= LLGL::WindowFlags::Resizable;
     window.SetDesc(wndDesc);
 
     // Add window resize listener

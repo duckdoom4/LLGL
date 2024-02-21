@@ -347,14 +347,9 @@ LRESULT CALLBACK Win32WindowCallback(HWND wnd, UINT msg, WPARAM wParam, LPARAM l
 
         case WM_ERASEBKGND:
         {
-            /* Do not erase background to avoid flickering when user resizes the window */
-            if (Win32Window* window = GetWindowFromUserData(wnd))
-            {
-                if (window->SkipMsgERASEBKGND())
-                    return 0;
-            }
+            // Do not erase background to avoid flickering when user resizes the window
+            return 1;
         }
-        break;
 
         case WM_ENTERSIZEMOVE:
         {

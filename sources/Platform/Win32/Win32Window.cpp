@@ -72,9 +72,8 @@ static DWORD GetWindowStyle(const WindowDescriptor& desc)
 
     const bool hasWindowContext =
     (
-        desc.windowContext != nullptr &&
-        desc.windowContextSize == sizeof(NativeHandle) &&
-        reinterpret_cast<const NativeHandle*>(desc.windowContext)->window != 0
+        desc.parentWnd != nullptr &&
+        reinterpret_cast<const NativeHandle*>(desc.parentWnd)->window != 0
     );
 
     if (hasWindowContext)
@@ -302,8 +301,7 @@ WindowDescriptor Win32Window::GetDesc() const
 
         if (parentWnd_ != nullptr)
         {
-            desc.windowContext      = &parentWnd_;
-            desc.windowContextSize  = sizeof(parentWnd_);
+            desc.parentWnd      = &parentWnd_;
         }
     }
     return desc;
@@ -383,9 +381,9 @@ void Win32Window::SetDesc(const WindowDescriptor& desc)
  * ======= Private: =======
  */
 
-static HWND GetNativeWin32ParentWindow(const void* nativeHandle, std::size_t nativeHandleSize)
+static HWND GetNativeWin32ParentWindow(const void* nativeHandle)
 {
-    if (nativeHandle != nullptr && nativeHandleSize == sizeof(NativeHandle))
+    if (nativeHandle != nullptr)
         return reinterpret_cast<const NativeHandle*>(nativeHandle)->window;
     else
         return nullptr;
@@ -397,19 +395,19 @@ HWND Win32Window::CreateWindowHandle(const WindowDescriptor& desc)
     const Win32FrameAndStyle frame = GetWin32FrameAndStyleFromDesc(desc);
 
     /* Get parent window */
-    parentWnd_ = GetNativeWin32ParentWindow(desc.windowContext, desc.windowContextSize);
+    parentWnd_ = GetNativeWin32ParentWindow(desc.parentWnd);
     HWND parentWndOrDesktop = (parentWnd_ != nullptr ? parentWnd_ : HWND_DESKTOP);
 
     #ifdef UNICODE
-    SmallVector<wchar_t> title = desc.title.to_utf16();
+    std::wstring title(desc.title.begin(), desc.title.end());
     #else
-    const UTF8String& title = desc.title;
+    const std::string& title = desc.title;
     #endif
 
     /* Create frame window object */
     HWND wnd = CreateWindow(
         Win32WindowClass::Get()->GetName(),
-        title.data(),
+        title.c_str(),
         frame.style,
         frame.position.x,
         frame.position.y,
