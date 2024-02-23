@@ -54,7 +54,7 @@ endif()
 
 # === Project ===
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -90,6 +90,9 @@ if(LLGL_IOS_PLATFORM OR LLGL_ANDROID_PLATFORM)
 else()
     set(LLGL_MOBILE_PLATFORM OFF)
 endif()
+
+remove_definitions("-D_MBCS")
+add_definitions("-D_SBCS")
 
 macro(ADD_DEFINE IDENT)
     add_definitions("-D${IDENT}")
@@ -345,11 +348,10 @@ endfunction()
 if(WIN32)
     ADD_DEFINE(_CRT_SECURE_NO_WARNINGS)
     ADD_DEFINE(_SCL_SECURE_NO_WARNINGS)
-    ADD_DEFINE(UNICODE)
     ADD_DEFINE(NOMINMAX)
     if(MSVC)
         # Disable some warnings for MSVC compiler
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250 /wd4251 /wd4290 /wd4103")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250 /wd4251 /wd4290 /wd4103 /utf-8")
     endif(MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DLLGL_DEBUG")
 else()
