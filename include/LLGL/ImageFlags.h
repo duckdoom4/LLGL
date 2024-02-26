@@ -38,18 +38,6 @@ The counterpart for reading a MIP-map from a hardware texture by writing to a de
 */
 struct ImageView
 {
-    ImageView() = default;
-    ImageView(const ImageView&) = default;
-
-    //! Constructor to initialize all attributes.
-    inline ImageView(ImageFormat format, DataType dataType, const void* data, std::size_t dataSize) :
-        format   { format   },
-        dataType { dataType },
-        data     { data     },
-        dataSize { dataSize }
-    {
-    }
-
     //! Specifies the image format. By default ImageFormat::RGBA.
     ImageFormat format      = ImageFormat::RGBA;
 
@@ -72,18 +60,6 @@ struct ImageView
 */
 struct MutableImageView
 {
-    MutableImageView() = default;
-    MutableImageView(const MutableImageView&) = default;
-
-    //! Constructor to initialize all attributes.
-    inline MutableImageView(ImageFormat format, DataType dataType, void* data, std::size_t dataSize) :
-        format   { format   },
-        dataType { dataType },
-        data     { data     },
-        dataSize { dataSize }
-    {
-    }
-
     //! Specifies the image format. By default ImageFormat::RGBA.
     ImageFormat format      = ImageFormat::RGBA;
 
@@ -96,85 +72,6 @@ struct MutableImageView
     //! Specifies the size (in bytes) of the image data. This is primarily used for compressed images and serves for robustness.
     std::size_t dataSize    = 0;
 };
-
-struct LLGL_DEPRECATED("LLGL::SrcImageDescriptor is deprecated since 0.04b; Use LLGL::ImageView instead!", "ImageView") SrcImageDescriptor
-{
-    SrcImageDescriptor() = default;
-    SrcImageDescriptor(const SrcImageDescriptor&) = default;
-
-    inline SrcImageDescriptor(ImageFormat format, DataType dataType, const void* data, std::size_t dataSize) :
-        format   { format   },
-        dataType { dataType },
-        data     { data     },
-        dataSize { dataSize }
-    {
-    }
-
-    inline SrcImageDescriptor(const ImageView& view) :
-        format   { view.format   },
-        dataType { view.dataType },
-        data     { view.data     },
-        dataSize { view.dataSize }
-    {
-    }
-
-    inline operator ImageView() const
-    {
-        #ifdef _MSC_VER
-        #pragma warning(push)
-        #pragma warning(disable : 4996)
-        #endif
-        return ImageView{ format, dataType, data, dataSize };
-        #ifdef _MSC_VER
-        #pragma warning(pop)
-        #endif
-    }
-
-    ImageFormat format      = ImageFormat::RGBA;
-    DataType    dataType    = DataType::UInt8;
-    const void* data        = nullptr;
-    std::size_t dataSize    = 0;
-};
-
-struct LLGL_DEPRECATED("LLGL::DstImageDescriptor is deprecated since 0.04b; Use LLGL::MutableImageView instead!", "MutableImageView") DstImageDescriptor
-{
-    DstImageDescriptor() = default;
-    DstImageDescriptor(const DstImageDescriptor&) = default;
-
-    inline DstImageDescriptor(ImageFormat format, DataType dataType, void* data, std::size_t dataSize) :
-        format   { format   },
-        dataType { dataType },
-        data     { data     },
-        dataSize { dataSize }
-    {
-    }
-
-    inline DstImageDescriptor(const MutableImageView& view) :
-        format   { view.format   },
-        dataType { view.dataType },
-        data     { view.data     },
-        dataSize { view.dataSize }
-    {
-    }
-
-    inline operator MutableImageView() const
-    {
-        #ifdef _MSC_VER
-        #pragma warning(push)
-        #pragma warning(disable : 4996)
-        #endif
-        return MutableImageView{ format, dataType, data, dataSize };
-        #ifdef _MSC_VER
-        #pragma warning(pop)
-        #endif
-    }
-
-    ImageFormat format      = ImageFormat::RGBA;
-    DataType    dataType    = DataType::UInt8;
-    void*       data        = nullptr;
-    std::size_t dataSize    = 0;
-};
-
 
 /* ----- Functions ----- */
 
