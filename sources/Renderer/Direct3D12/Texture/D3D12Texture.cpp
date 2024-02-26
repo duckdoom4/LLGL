@@ -196,7 +196,7 @@ static void ConvertD3DTextureExtent(D3D12_RESOURCE_DESC& outDesc, TextureType ty
         case TextureType::Texture1DArray:
             outDesc.Width               = extent.x;
             outDesc.Height              = 1;
-            outDesc.DepthOrArraySize    = std::max(1u, arrayLayers);
+            outDesc.DepthOrArraySize    = static_cast<std::uint16_t>(std::max(1u, arrayLayers));
             break;
 
         case TextureType::Texture2D:
@@ -205,13 +205,13 @@ static void ConvertD3DTextureExtent(D3D12_RESOURCE_DESC& outDesc, TextureType ty
         case TextureType::TextureCubeArray:
             outDesc.Width               = extent.x;
             outDesc.Height              = extent.y;
-            outDesc.DepthOrArraySize    = std::max(1u, arrayLayers);
+            outDesc.DepthOrArraySize    = static_cast<std::uint16_t>(std::max(1u, arrayLayers));
             break;
 
         case TextureType::Texture3D:
             outDesc.Width               = extent.x;
             outDesc.Height              = extent.y;
-            outDesc.DepthOrArraySize    = extent.z;
+            outDesc.DepthOrArraySize    = static_cast<std::uint16_t>(extent.z);
             break;
 
         case TextureType::Texture2DMS:
