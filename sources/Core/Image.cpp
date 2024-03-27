@@ -473,7 +473,7 @@ bool Image::IsRegionInside(const Offset3D& offset, const Extent3D& extent) const
  * ======= Private: =======
  */
 
-void Image::ResetAttributes()
+void Image::ResetAttributes() noexcept
 {
     format_     = ImageFormat::RGBA;
     dataType_   = DataType::UInt8;
