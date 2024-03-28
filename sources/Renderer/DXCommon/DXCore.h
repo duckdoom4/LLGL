@@ -40,7 +40,9 @@ void DXThrowIfCreateFailed(const HRESULT hr, const char* interfaceName, const ch
 void DXThrowIfInvocationFailed(const HRESULT hr, const char* funcName, const char* contextInfo = nullptr);
 
 // Returns the specified value as a DirectX BOOL type.
-BOOL DXBoolean(bool value);
+constexpr BOOL DXBoolean(bool value) {
+    return (value ? TRUE : FALSE);
+}
 
 // Returns the blob data as string.
 std::string DXGetBlobString(ID3DBlob* blob);

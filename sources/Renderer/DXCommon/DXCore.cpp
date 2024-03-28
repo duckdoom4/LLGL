@@ -176,11 +176,6 @@ void DXThrowIfInvocationFailed(const HRESULT hr, const char* funcName, const cha
     }
 }
 
-BOOL DXBoolean(bool value)
-{
-    return (value ? TRUE : FALSE);
-}
-
 template <typename Cont>
 Cont GetBlobDataTmpl(ID3DBlob* blob)
 {
@@ -336,20 +331,18 @@ static std::vector<VideoAdapterOutputInfo> GetDXGIAdapterOutputInfos(IDXGIAdapte
 
         for_range(i, numModes)
         {
-            DisplayMode displayMode;
-            {
-                displayMode.resolution.x    = modeDesc[i].Width;
-                displayMode.resolution.y   = modeDesc[i].Height;
-                displayMode.refreshRate         = (modeDesc[i].RefreshRate.Denominator > 0 ? modeDesc[i].RefreshRate.Numerator / modeDesc[i].RefreshRate.Denominator : 0);
-            }
+            DisplayMode displayMode{
+                .resolution = { modeDesc[i].Width, modeDesc[i].Height },
+                .refreshRate = (modeDesc[i].RefreshRate.Denominator > 0 ? modeDesc[i].RefreshRate.Numerator / modeDesc[i].RefreshRate.Denominator : 0),
+            };
             videoOutput.displayModes.push_back(displayMode);
         }
 
         /* Remove duplicate display modes */
-        std::sort(videoOutput.displayModes.begin(), videoOutput.displayModes.end(), CompareSWO);
+        std::ranges::sort(videoOutput.displayModes, CompareSWO);
 
         videoOutput.displayModes.erase(
-            std::unique(videoOutput.displayModes.begin(), videoOutput.displayModes.end()),
+            std::ranges::unique(videoOutput.displayModes).begin(),
             videoOutput.displayModes.end()
         );
 

@@ -64,13 +64,13 @@ D3D11RenderSystem::D3D11RenderSystem(const RenderSystemDescriptor& renderSystemD
     }
     else
     {
-        /* Create DXGU factory, query video adapters, and create D3D11 device */
+        /* Create DXGI factory, query video adapters, and create D3D11 device */
         CreateFactory();
 
-        ComPtr<IDXGIAdapter> preferredAdatper;
-        QueryVideoAdapters(renderSystemDesc.flags, preferredAdatper);
+        ComPtr<IDXGIAdapter> preferredAdapter;
+        QueryVideoAdapters(renderSystemDesc.flags, preferredAdapter);
 
-        HRESULT hr = CreateDevice(preferredAdatper.Get(), debugDevice);
+        HRESULT hr = CreateDevice(preferredAdapter.Get(), debugDevice);
         DXThrowIfFailed(hr, "failed to create D3D11 device");
     }
 
@@ -609,14 +609,14 @@ HRESULT D3D11RenderSystem::CreateDeviceWithFlags(IDXGIAdapter* adapter, const Ar
         hr = D3D11CreateDevice(
             adapter,                                    // Video adapter
             driver,                                     // Driver type
-            0,                                          // Software rasterizer module (none)
+            nullptr,                                    // Software rasterizer module (none)
             flags,                                      // Flags
             featureLevels.data(),                       // Feature level
             static_cast<UINT>(featureLevels.size()),    // Num feature levels
             D3D11_SDK_VERSION,                          // SDK version
-            device_.ReleaseAndGetAddressOf(),           // Output device
+            &device_,                                  // Output device
             &featureLevel_,                             // Output feature level
-            context_.ReleaseAndGetAddressOf()           // Output device context
+            &context_                                  // Output device context
         );
         if (SUCCEEDED(hr))
             break;
