@@ -83,6 +83,8 @@ class D3D11SwapChain final : public SwapChain
         void CreateBackBuffer();
         void ResizeBackBuffer(const Extent2D& resolution);
 
+        void CheckTearingSupport(IDXGIFactory* factory);
+
     private:
 
         ComPtr<ID3D11Device>            device_;
@@ -96,6 +98,8 @@ class D3D11SwapChain final : public SwapChain
         ComPtr<ID3D11RenderTargetView>  renderTargetView_;
         ComPtr<ID3D11Texture2D>         depthBuffer_;
         ComPtr<ID3D11DepthStencilView>  depthStencilView_;
+
+        bool                            tearingSupported_       = false;
 
         DXGI_FORMAT                     colorFormat_            = DXGI_FORMAT_UNKNOWN;
         DXGI_FORMAT                     depthStencilFormat_     = DXGI_FORMAT_UNKNOWN;
