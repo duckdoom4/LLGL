@@ -296,8 +296,8 @@ void D3D11SwapChain::CreateSwapChain(IDXGIFactory* factory, const Extent2D& reso
 
     DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
     {
-        swapChainDesc.BufferDesc.Width          = resolution.width;
-        swapChainDesc.BufferDesc.Height         = resolution.height;
+        swapChainDesc.BufferDesc.Width          = resolution.x;
+        swapChainDesc.BufferDesc.Height         = resolution.y;
         swapChainDesc.BufferDesc.Format         = colorFormat_;
         swapChainDesc.BufferDesc.RefreshRate    = refreshRate;
         swapChainDesc.SampleDesc                = swapChainSampleDesc_;
@@ -330,8 +330,8 @@ void D3D11SwapChain::CreateSwapChain1(IDXGIFactory2* factory2, const Extent2D& r
 
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
     {
-        swapChainDesc.Width = resolution.width;
-        swapChainDesc.Height = resolution.height;
+        swapChainDesc.Width = resolution.x;
+        swapChainDesc.Height = resolution.y;
         swapChainDesc.Format = colorFormat_;
         swapChainDesc.SampleDesc = swapChainSampleDesc_;
         swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -408,7 +408,7 @@ void D3D11SwapChain::ResizeBackBuffer(const Extent2D& resolution)
     DXGI_SWAP_CHAIN_DESC desc;
     swapChain_->GetDesc(&desc);
 
-    HRESULT hr = swapChain_->ResizeBuffers(0, resolution.width, resolution.height, DXGI_FORMAT_UNKNOWN, desc.Flags);
+    HRESULT hr = swapChain_->ResizeBuffers(0, resolution.x, resolution.y, DXGI_FORMAT_UNKNOWN, desc.Flags);
     DXThrowIfFailed(hr, "failed to resize DXGI swap-chain buffers");
 
     BOOL fullscreenState;
