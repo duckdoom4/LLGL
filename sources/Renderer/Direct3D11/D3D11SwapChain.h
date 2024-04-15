@@ -94,6 +94,8 @@ class D3D11SwapChain final : public SwapChain
         
         void StoreDebugNames(std::string (&debugNames)[4]);
         void RestoreDebugNames(const std::string (&debugNames)[4]);
+        
+        void CheckTearingSupport(IDXGIFactory* factory);
 
     private:
 
@@ -113,7 +115,10 @@ class D3D11SwapChain final : public SwapChain
 
         DXGI_FORMAT                     colorFormat_            = DXGI_FORMAT_UNKNOWN;
         DXGI_FORMAT                     depthStencilFormat_     = DXGI_FORMAT_UNKNOWN;
+
         bool                            hasDebugName_           = false;
+        bool                            tearingSupported_       = false;
+        bool                            windowedMode_           = false;
 
 };
 
