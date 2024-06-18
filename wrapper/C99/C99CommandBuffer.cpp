@@ -34,9 +34,9 @@ LLGL_C_EXPORT void llglEnd()
     g_CurrentCmdBuf = NULL;
 }
 
-LLGL_C_EXPORT void llglExecute(LLGLCommandBuffer deferredCommandBuffer)
+LLGL_C_EXPORT void llglExecute(LLGLCommandBuffer secondaryCommandBuffer)
 {
-    g_CurrentCmdBuf->Execute(LLGL_REF(CommandBuffer, deferredCommandBuffer));
+    g_CurrentCmdBuf->Execute(LLGL_REF(CommandBuffer, secondaryCommandBuffer));
 }
 
 LLGL_C_EXPORT void llglUpdateBuffer(LLGLBuffer dstBuffer, uint64_t dstOffset, const void* data, uint16_t dataSize)
@@ -136,7 +136,7 @@ LLGL_C_EXPORT void llglSetResource(uint32_t descriptor, LLGLResource resource)
 
 LLGL_C_EXPORT void llglResetResourceSlots(LLGLResourceType resourceType, uint32_t firstSlot, uint32_t numSlots, long bindFlags, long stageFlags)
 {
-    g_CurrentCmdBuf->ResetResourceSlots((ResourceType)resourceType, firstSlot, numSlots, bindFlags, stageFlags);
+    // deprecated
 }
 
 LLGL_C_EXPORT void llglBeginRenderPass(LLGLRenderTarget renderTarget)

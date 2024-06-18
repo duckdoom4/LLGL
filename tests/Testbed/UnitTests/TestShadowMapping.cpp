@@ -110,7 +110,7 @@ DEF_TEST( ShadowMapping )
             psoDesc.depth.writeEnabled  = true;
             psoDesc.rasterizer.cullMode = CullMode::Back;
         }
-        psoScene = renderer->CreatePipelineState(psoDesc);
+        CreateGraphicsPSO(psoDesc, "psoShadowScene", &psoScene);
 
         if (const Report* report = psoScene->GetReport())
         {
@@ -189,7 +189,7 @@ DEF_TEST( ShadowMapping )
             psoDesc.rasterizer.depthBias.slopeFactor    = 1.5f;
             psoDesc.blend.targets[0].colorMask          = 0x0;
         }
-        resources.pso = renderer->CreatePipelineState(psoDesc);
+        CreateGraphicsPSO(psoDesc, "psoShadowMap", &(resources.pso));
 
         if (const Report* report = resources.pso->GetReport())
         {
@@ -360,8 +360,12 @@ DEF_TEST( ShadowMapping )
             cmdBuffer->PopDebugGroup();
         }
 
-        // Capture framebuffer
-        readbackTex = CaptureFramebuffer(*cmdBuffer, swapChain->GetColorFormat(), opt.resolution);
+        // Capture framebuffer (must be inside a render pass)
+        cmdBuffer->BeginRenderPass(*swapChain);
+        {
+            readbackTex = CaptureFramebuffer(*cmdBuffer, swapChain->GetColorFormat(), opt.resolution);
+        }
+        cmdBuffer->EndRenderPass();
     }
     cmdBuffer->End();
 

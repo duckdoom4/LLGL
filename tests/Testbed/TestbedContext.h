@@ -75,7 +75,17 @@ class TestbedContext
             LLGL::RenderTarget**                output
         );
 
+        TestResult CreateGraphicsPSO(
+            const LLGL::GraphicsPipelineDescriptor& desc,
+            const char*                             name,
+            LLGL::PipelineState**                   output
+        );
+
+        // Returns true if the current renderer requires combined texture samplers (OpenGL only).
         bool HasCombinedSamplers() const;
+
+        // Returns true if the current renderer requires unique bindings slots (Vulkan only).
+        bool HasUniqueBindingSlots() const;
 
     protected:
 
@@ -119,6 +129,11 @@ class TestbedContext
             VSShadowMap,
             VSShadowedScene,
             PSShadowedScene,
+            VSResourceBinding,
+            PSResourceBinding,
+            CSResourceBinding,
+            VSClear,
+            PSClear,
 
             ShaderCount,
         };
@@ -156,12 +171,12 @@ class TestbedContext
         struct Options
         {
             std::string                 outputDir;
-            bool                        verbose;
-            bool                        pedantic;       // Ignore thresholds, always compare strictly against reference values
-            bool                        greedy;         // Continue testing on failure
-            bool                        sanityCheck;    // This is 'very verbose' and dumps out all intermediate data on successful tests
-            bool                        showTiming;
-            bool                        fastTest;       // Skip slow buffer/texture creations to speed up test run
+            bool                        verbose     = false;
+            bool                        pedantic    = false; // Ignore thresholds, always compare strictly against reference values
+            bool                        greedy      = false; // Continue testing on failure
+            bool                        sanityCheck = false; // This is 'very verbose' and dumps out all intermediate data on successful tests
+            bool                        showTiming  = false;
+            bool                        fastTest    = false; // Skip slow buffer/texture creations to speed up test run
             LLGL::Extent2D              resolution;
             std::vector<std::string>    selectedTests;
 
@@ -287,6 +302,8 @@ class TestbedContext
 
         static LLGL::Image LoadImageFromFile(const std::string& filename, bool verbose = false);
         static void SaveImageToFile(const LLGL::Image& img, const std::string& filename, bool verbose = false);
+
+        static bool IsRGBA8ubInThreshold(const std::uint8_t lhs[4], const std::uint8_t rhs[4], int threshold = 1);
 
     private:
 

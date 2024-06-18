@@ -22,7 +22,7 @@ class MTDirectCommandBuffer final : public MTCommandBuffer
 
     public:
 
-        #include "MTCommandBuffer.inl"
+        #include <LLGL/Backend/CommandBuffer.inl>
 
     public:
 
@@ -32,6 +32,9 @@ class MTDirectCommandBuffer final : public MTCommandBuffer
 
         // Returns false.
         bool IsMultiSubmitCmdBuffer() const override;
+
+        // Marks this command buffer as submitted to the command queue, allowing its semaphore to be signaled.
+        void MarkSubmitted();
 
         // Returns the native MTLCommandBuffer object.
         inline id<MTLCommandBuffer> GetNative() const
@@ -58,19 +61,11 @@ class MTDirectCommandBuffer final : public MTCommandBuffer
         void FillBufferByte4Emulated(MTBuffer& bufferMT, const NSRange& range, std::uint32_t value);
         void FillBufferByte4Accelerated(MTBuffer& bufferMT, const NSRange& range, std::uint32_t value);
 
-        id<MTLRenderCommandEncoder> DispatchTessellationAndGetRenderEncoder(NSUInteger numPatches, NSUInteger numInstances = 1);
-
-        // Dispatches the specified amount of local threads in as large threadgroups as possible.
-        void DispatchThreads1D(
-            id<MTLComputeCommandEncoder>    computeEncoder,
-            id<MTLComputePipelineState>     computePSO,
-            NSUInteger                      numThreads
-        );
-
     private:
 
-        id<MTLCommandBuffer>            cmdBuffer_              = nil;
-        dispatch_semaphore_t            cmdBufferSemaphore_     = nil;
+        id<MTLCommandBuffer>            cmdBuffer_          = nil;
+        dispatch_semaphore_t            cmdBufferSemaphore_ = nil;
+        bool                            cmdBufferDirty_     = false;
 
         MTCommandQueue&                 cmdQueue_;
         MTCommandContext                context_;

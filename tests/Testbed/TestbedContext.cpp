@@ -311,6 +311,7 @@ unsigned TestbedContext::RunAllTests()
 
     // Run all command buffer tests
     RUN_TEST( CommandBufferSubmit         );
+    RUN_TEST( CommandBufferEncode         );
 
     // Run all resource tests
     RUN_TEST( BufferWriteAndRead          );
@@ -328,6 +329,7 @@ unsigned TestbedContext::RunAllTests()
     RUN_TEST( RenderTargetNAttachments    );
     RUN_TEST( MipMaps                     );
     RUN_TEST( PipelineCaching             );
+    RUN_TEST( ShaderErrors                );
 
     // Run all rendering tests
     RUN_TEST( DepthBuffer                 );
@@ -342,6 +344,7 @@ unsigned TestbedContext::RunAllTests()
     RUN_TEST( Uniforms                    );
     RUN_TEST( ShadowMapping               );
     RUN_TEST( ViewportAndScissor          );
+    RUN_TEST( ResourceBinding             );
 
     #undef RUN_TEST
 
@@ -688,9 +691,45 @@ TestResult TestbedContext::CreateRenderTarget(
     return TestResult::Passed;
 }
 
+TestResult TestbedContext::CreateGraphicsPSO(
+    const LLGL::GraphicsPipelineDescriptor& desc,
+    const char*                             name,
+    LLGL::PipelineState**                   output)
+{
+    TestResult result = TestResult::Passed;
+
+    // Create graphics PSO
+    PipelineState* pso = renderer->CreatePipelineState(desc);
+
+    // Check for PSO compilation errors
+    if (const Report* report = pso->GetReport())
+    {
+        if (report->HasErrors())
+        {
+            if (name == nullptr)
+                name = (desc.debugName != nullptr ? desc.debugName : "<unnamed>");
+            Log::Errorf("Error while compiling graphics PSO \"%s\":\n%s", name, report->GetText());
+            result = TestResult::FailedErrors;
+        }
+    }
+
+    // Return PSO to output or delete right away if no longer needed
+    if (output != nullptr)
+        *output = pso;
+    else
+        renderer->Release(*pso);
+
+    return result;
+}
+
 bool TestbedContext::HasCombinedSamplers() const
 {
     return (renderer->GetRendererID() == RendererID::OpenGL);
+}
+
+bool TestbedContext::HasUniqueBindingSlots() const
+{
+    return (renderer->GetRendererID() == RendererID::Vulkan);
 }
 
 static std::string FormatCharArray(const unsigned char* data, std::size_t count, std::size_t bytesPerGroup, std::size_t maxWidth)
@@ -833,6 +872,11 @@ bool TestbedContext::LoadShaders()
         shaders[VSShadowMap]        = LoadShaderFromFile(shaderPath + "ShadowMapping.hlsl",         ShaderType::Vertex,   "VShadow", "vs_5_0");
         shaders[VSShadowedScene]    = LoadShaderFromFile(shaderPath + "ShadowMapping.hlsl",         ShaderType::Vertex,   "VScene",  "vs_5_0");
         shaders[PSShadowedScene]    = LoadShaderFromFile(shaderPath + "ShadowMapping.hlsl",         ShaderType::Fragment, "PScene",  "ps_5_0");
+        shaders[VSResourceBinding]  = LoadShaderFromFile(shaderPath + "ResourceBinding.hlsl",       ShaderType::Vertex,   "VSMain",  "vs_5_0", nullptr, VertFmtEmpty);
+        shaders[PSResourceBinding]  = LoadShaderFromFile(shaderPath + "ResourceBinding.hlsl",       ShaderType::Fragment, "PSMain",  "ps_5_0");
+        shaders[CSResourceBinding]  = LoadShaderFromFile(shaderPath + "ResourceBinding.hlsl",       ShaderType::Compute,  "CSMain",  "cs_5_0");
+        shaders[VSClear]            = LoadShaderFromFile(shaderPath + "ClearScreen.hlsl",           ShaderType::Vertex,   "VSMain",  "vs_5_0", nullptr, VertFmtEmpty);
+        shaders[PSClear]            = LoadShaderFromFile(shaderPath + "ClearScreen.hlsl",           ShaderType::Fragment, "PSMain",  "ps_5_0");
     }
     else if (IsShadingLanguageSupported(ShadingLanguage::GLSL))
     {
@@ -852,6 +896,14 @@ bool TestbedContext::LoadShaders()
         shaders[VSShadowMap]        = LoadShaderFromFile(shaderPath + "ShadowMapping.VShadow.330core.vert", ShaderType::Vertex);
         shaders[VSShadowedScene]    = LoadShaderFromFile(shaderPath + "ShadowMapping.VScene.330core.vert",  ShaderType::Vertex);
         shaders[PSShadowedScene]    = LoadShaderFromFile(shaderPath + "ShadowMapping.PScene.330core.frag",  ShaderType::Fragment);
+        if (IsShadingLanguageSupported(ShadingLanguage::GLSL_450))
+        {
+            shaders[VSResourceBinding] = LoadShaderFromFile(shaderPath + "ResourceBinding.450core.vert",       ShaderType::Vertex,   nullptr, nullptr, nullptr, VertFmtEmpty);
+            shaders[PSResourceBinding] = LoadShaderFromFile(shaderPath + "ResourceBinding.450core.frag",       ShaderType::Fragment);
+            shaders[CSResourceBinding] = LoadShaderFromFile(shaderPath + "ResourceBinding.450core.comp",       ShaderType::Compute);
+        }
+        shaders[VSClear]            = LoadShaderFromFile(shaderPath + "ClearScreen.330core.vert",           ShaderType::Vertex,   nullptr, nullptr, nullptr, VertFmtEmpty);
+        shaders[PSClear]            = LoadShaderFromFile(shaderPath + "ClearScreen.330core.frag",           ShaderType::Fragment);
     }
     else if (IsShadingLanguageSupported(ShadingLanguage::Metal))
     {
@@ -868,6 +920,11 @@ bool TestbedContext::LoadShaders()
         shaders[VSShadowMap]        = LoadShaderFromFile(shaderPath + "ShadowMapping.metal",        ShaderType::Vertex,   "VShadow", "1.1");
         shaders[VSShadowedScene]    = LoadShaderFromFile(shaderPath + "ShadowMapping.metal",        ShaderType::Vertex,   "VScene",  "1.1");
         shaders[PSShadowedScene]    = LoadShaderFromFile(shaderPath + "ShadowMapping.metal",        ShaderType::Fragment, "PScene",  "1.1");
+//      shaders[VSResourceBinding]  = LoadShaderFromFile(shaderPath + "ResourceBinding.metal",      ShaderType::Vertex,   "VSMain",  "1.1", nullptr, VertFmtEmpty);
+//      shaders[PSResourceBinding]  = LoadShaderFromFile(shaderPath + "ResourceBinding.metal",      ShaderType::Fragment, "PSMain",  "1.1");
+//      shaders[CSResourceBinding]  = LoadShaderFromFile(shaderPath + "ResourceBinding.metal",      ShaderType::Compute,  "CSMain",  "1.1");
+        shaders[VSClear]            = LoadShaderFromFile(shaderPath + "ClearScreen.metal",          ShaderType::Vertex,   "VSMain",  "1.1", nullptr, VertFmtEmpty);
+        shaders[PSClear]            = LoadShaderFromFile(shaderPath + "ClearScreen.metal",          ShaderType::Fragment, "PSMain",  "1.1");
     }
     else if (IsShadingLanguageSupported(ShadingLanguage::SPIRV))
     {
@@ -884,10 +941,15 @@ bool TestbedContext::LoadShaders()
         shaders[VSShadowMap]        = LoadShaderFromFile(shaderPath + "ShadowMapping.VShadow.450core.vert.spv", ShaderType::Vertex);
         shaders[VSShadowedScene]    = LoadShaderFromFile(shaderPath + "ShadowMapping.VScene.450core.vert.spv",  ShaderType::Vertex);
         shaders[PSShadowedScene]    = LoadShaderFromFile(shaderPath + "ShadowMapping.PScene.450core.frag.spv",  ShaderType::Fragment);
+        shaders[VSResourceBinding]  = LoadShaderFromFile(shaderPath + "ResourceBinding.450core.vert.spv",       ShaderType::Vertex,   nullptr, nullptr, nullptr, VertFmtEmpty);
+        shaders[PSResourceBinding]  = LoadShaderFromFile(shaderPath + "ResourceBinding.450core.frag.spv",       ShaderType::Fragment);
+        shaders[CSResourceBinding]  = LoadShaderFromFile(shaderPath + "ResourceBinding.450core.comp.spv",       ShaderType::Compute);
+        shaders[VSClear]            = LoadShaderFromFile(shaderPath + "ClearScreen.450core.vert.spv",           ShaderType::Vertex,   nullptr, nullptr, nullptr, VertFmtEmpty);
+        shaders[PSClear]            = LoadShaderFromFile(shaderPath + "ClearScreen.450core.frag.spv",           ShaderType::Fragment);
     }
     else
     {
-        Log::Errorf("No shaders provided for this backend");
+        Log::Errorf("No shaders provided for this backend\n");
         return false;
     }
 
@@ -918,15 +980,27 @@ bool TestbedContext::LoadTextures()
 {
     auto LoadTextureFromFile = [this](const char* name, const std::string& filename) -> Texture*
     {
+        auto PrintLoadingInfo = [&filename]()
+        {
+            Log::Printf("Loading image: %s", filename.c_str());
+        };
+
+        if (opt.verbose)
+            PrintLoadingInfo();
+
         // Load image
         int w = 0, h = 0, c = 0;
         stbi_uc* imgBuf = stbi_load(filename.c_str(), &w, &h, &c, 4);
 
         if (!imgBuf)
         {
-            Log::Errorf("Failed to load image: %s\n", filename.c_str());
+            if (!opt.verbose)
+                PrintLoadingInfo();
+            Log::Printf(" [ %s ]:\n", TestResultToStr(TestResult::FailedErrors));
             return nullptr;
         }
+        else if (opt.verbose)
+            Log::Printf(" [ Ok ]\n");
 
         // Create texture
         ImageView imageView;
@@ -1278,6 +1352,17 @@ void TestbedContext::SaveImageToFile(const LLGL::Image& img, const std::string& 
         Extent2D{ img.GetExtent().width, img.GetExtent().height },
         filename,
         verbose
+    );
+}
+
+bool TestbedContext::IsRGBA8ubInThreshold(const std::uint8_t lhs[4], const std::uint8_t rhs[4], int threshold)
+{
+    return
+    (
+        std::abs(static_cast<int>(lhs[0]) - static_cast<int>(rhs[0])) <= threshold &&
+        std::abs(static_cast<int>(lhs[1]) - static_cast<int>(rhs[1])) <= threshold &&
+        std::abs(static_cast<int>(lhs[2]) - static_cast<int>(rhs[2])) <= threshold &&
+        std::abs(static_cast<int>(lhs[3]) - static_cast<int>(rhs[3])) <= threshold
     );
 }
 

@@ -787,6 +787,14 @@ namespace LLGL
     }
 
     [Flags]
+    public enum BarrierFlags : int
+    {
+        StorageBuffer  = (1 << 0),
+        StorageTexture = (1 << 1),
+        Storage        = (StorageBuffer | StorageTexture),
+    }
+
+    [Flags]
     public enum ColorMaskFlags : int
     {
         Zero = 0,
@@ -840,14 +848,6 @@ namespace LLGL
         NoInitialData = (1 << 3),
         Append        = (1 << 4),
         Counter       = (1 << 5),
-    }
-
-    [Flags]
-    public enum BarrierFlags : int
-    {
-        StorageBuffer  = (1 << 0),
-        StorageTexture = (1 << 1),
-        Storage        = (StorageBuffer | StorageTexture),
     }
 
     [Flags]
@@ -1467,6 +1467,7 @@ namespace LLGL
         public AnsiString     DebugName { get; set; }        = null;
         public PipelineLayout PipelineLayout { get; set; }   = null;
         public int            NumResourceViews { get; set; } = 0;
+        [Obsolete("ResourceHeapDescriptor.barrierFlags is deprecated since 0.04b; Use PipelineLayoutDescriptor.barrierFlags instead!")]
         public BarrierFlags   BarrierFlags { get; set; }     = 0;
 
         internal NativeLLGL.ResourceHeapDescriptor Native
@@ -1485,7 +1486,6 @@ namespace LLGL
                         native.pipelineLayout = PipelineLayout.Native;
                     }
                     native.numResourceViews = NumResourceViews;
-                    native.barrierFlags     = (int)BarrierFlags;
                 }
                 return native;
             }
@@ -2891,6 +2891,7 @@ namespace LLGL
                 }
             }
         }
+        public BarrierFlags              BarrierFlags { get; set; }   = 0;
 
         internal NativeLLGL.PipelineLayoutDescriptor Native
         {
@@ -2935,6 +2936,7 @@ namespace LLGL
                             native.uniforms = uniformsPtr;
                         }
                     }
+                    native.barrierFlags   = (int)BarrierFlags;
                 }
                 return native;
             }
@@ -3606,7 +3608,8 @@ namespace LLGL
             public byte*          debugName;        /* = null */
             public PipelineLayout pipelineLayout;   /* = null */
             public int            numResourceViews; /* = 0 */
-            public int            barrierFlags;     /* = 0 */
+            [Obsolete("ResourceHeapDescriptor.barrierFlags is deprecated since 0.04b; Use PipelineLayoutDescriptor.barrierFlags instead!")]
+            public int            barrierFlags;
         }
 
         public unsafe struct ShaderMacro
@@ -4027,6 +4030,7 @@ namespace LLGL
             public StaticSamplerDescriptor* staticSamplers;
             public IntPtr                   numUniforms;
             public UniformDescriptor*       uniforms;
+            public int                      barrierFlags;      /* = 0 */
         }
 
         public unsafe struct GraphicsPipelineDescriptor
@@ -4186,7 +4190,7 @@ namespace LLGL
         public static extern unsafe void End();
 
         [DllImport(DllName, EntryPoint="llglExecute", CallingConvention=CallingConvention.Cdecl)]
-        public static extern unsafe void Execute(CommandBuffer deferredCommandBuffer);
+        public static extern unsafe void Execute(CommandBuffer secondaryCommandBuffer);
 
         [DllImport(DllName, EntryPoint="llglUpdateBuffer", CallingConvention=CallingConvention.Cdecl)]
         public static extern unsafe void UpdateBuffer(Buffer dstBuffer, long dstOffset, void* data, short dataSize);
@@ -4814,8 +4818,14 @@ namespace LLGL
         [DllImport(DllName, EntryPoint="llglSetWindowTitle", CallingConvention=CallingConvention.Cdecl)]
         public static extern unsafe void SetWindowTitle(Window window, [MarshalAs(UnmanagedType.LPWStr)] string title);
 
+        [DllImport(DllName, EntryPoint="llglSetWindowTitleUTF8", CallingConvention=CallingConvention.Cdecl)]
+        public static extern unsafe void SetWindowTitleUTF8(Window window, [MarshalAs(UnmanagedType.LPStr)] string title);
+
         [DllImport(DllName, EntryPoint="llglGetWindowTitle", CallingConvention=CallingConvention.Cdecl)]
         public static extern unsafe IntPtr GetWindowTitle(Window window, IntPtr outTitleLength, char* outTitle);
+
+        [DllImport(DllName, EntryPoint="llglGetWindowTitleUTF8", CallingConvention=CallingConvention.Cdecl)]
+        public static extern unsafe IntPtr GetWindowTitleUTF8(Window window, IntPtr outTitleLength, byte* outTitle);
 
         [DllImport(DllName, EntryPoint="llglShowWindow", CallingConvention=CallingConvention.Cdecl)]
         public static extern unsafe void ShowWindow(Window window, [MarshalAs(UnmanagedType.I1)] bool show);

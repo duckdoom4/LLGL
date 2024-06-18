@@ -40,6 +40,7 @@ DECL_RITEST( ImageConversions );
 
 // Command buffer tests
 DECL_TEST( CommandBufferSubmit );
+DECL_TEST( CommandBufferEncode );
 DECL_TEST( CommandBufferSecondary );
 DECL_TEST( CommandBufferMultiThreading );
 
@@ -59,6 +60,7 @@ DECL_TEST( RenderTarget1Attachment );
 DECL_TEST( RenderTargetNAttachments );
 DECL_TEST( MipMaps );
 DECL_TEST( PipelineCaching );
+DECL_TEST( ShaderErrors );
 
 // Rendering tests
 DECL_TEST( DepthBuffer );
@@ -71,6 +73,7 @@ DECL_TEST( TextureViews );
 DECL_TEST( Uniforms );
 DECL_TEST( ShadowMapping );
 DECL_TEST( ViewportAndScissor );
+DECL_TEST( ResourceBinding );
 
 #undef DECL_TEST
 

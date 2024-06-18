@@ -47,11 +47,11 @@ void NullCommandBuffer::End()
         ExecuteVirtualCommands();
 }
 
-void NullCommandBuffer::Execute(CommandBuffer& deferredCommandBuffer)
+void NullCommandBuffer::Execute(CommandBuffer& secondaryCommandBuffer)
 {
-    auto& deferredCommandBufferNull = LLGL_CAST(NullCommandBuffer&, deferredCommandBuffer);
-    if ((deferredCommandBufferNull.desc.flags & CommandBufferFlags::Secondary) != 0)
-        deferredCommandBufferNull.ExecuteVirtualCommands();
+    auto& secondaryCommandBufferNull = LLGL_CAST(NullCommandBuffer&, secondaryCommandBuffer);
+    if ((secondaryCommandBufferNull.desc.flags & CommandBufferFlags::Secondary) != 0)
+        secondaryCommandBufferNull.ExecuteVirtualCommands();
 }
 
 /* ----- Blitting ----- */
@@ -308,16 +308,6 @@ void NullCommandBuffer::SetResourceHeap(ResourceHeap& resourceHeap, std::uint32_
 }
 
 void NullCommandBuffer::SetResource(std::uint32_t descriptor, Resource& resource)
-{
-    //todo
-}
-
-void NullCommandBuffer::ResetResourceSlots(
-    const ResourceType  resourceType,
-    std::uint32_t       firstSlot,
-    std::uint32_t       numSlots,
-    long                bindFlags,
-    long                stageFlags)
 {
     //todo
 }

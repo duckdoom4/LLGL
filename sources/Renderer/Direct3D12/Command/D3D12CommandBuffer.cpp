@@ -39,7 +39,6 @@
 #include <pix.h>
 
 #include <algorithm>
-#include <codecvt>
 
 
 namespace LLGL
@@ -58,7 +57,7 @@ D3D12CommandBuffer::D3D12CommandBuffer(D3D12RenderSystem& renderSystem, const Co
 
 void D3D12CommandBuffer::SetDebugName(const char* name)
 {
-    D3D12SetObjectName(commandList_, name);
+    D3D12SetObjectName(GetNative(), name);
 }
 
 /* ----- Encoding ----- */
@@ -66,7 +65,7 @@ void D3D12CommandBuffer::SetDebugName(const char* name)
 void D3D12CommandBuffer::Begin()
 {
     /* Reset command list using the next command allocator */
-    commandContext_.Reset();
+    commandContext_.Reset(*commandQueue_);
 }
 
 void D3D12CommandBuffer::End()
@@ -82,20 +81,10 @@ void D3D12CommandBuffer::End()
         commandContext_.ExecuteAndSignal(*commandQueue_);
 }
 
-void D3D12CommandBuffer::Execute(CommandBuffer& deferredCommandBuffer)
+void D3D12CommandBuffer::Execute(CommandBuffer& secondaryCommandBuffer)
 {
-    auto& cmdBufferD3D = LLGL_CAST(D3D12CommandBuffer&, deferredCommandBuffer);
-
-    /*
-    TODO:
-      D3D12 bundles can bind descriptor heaps but they must match the primary command buffer's descriptor heaps.
-      As a workaround, always bind the descriptor heaps that were cached in the secondary command buffer,
-      since those that are shader visible will be the same throughout the command encoding (see D3D12StagingDescriptorHeapPool).
-      Some kind of descriptor heap sharing/pooling should be implemented next.
-    */
-    commandContext_.SetDescriptorHeapsOfOtherContext(cmdBufferD3D.commandContext_);
-
-    commandList_->ExecuteBundle(cmdBufferD3D.GetNative());
+    auto& cmdBufferD3D = LLGL_CAST(D3D12CommandBuffer&, secondaryCommandBuffer);
+    commandContext_.ExecuteBundle(cmdBufferD3D.commandContext_);
 }
 
 /* ----- Blitting ----- */
@@ -123,7 +112,7 @@ void D3D12CommandBuffer::CopyBuffer(
     commandContext_.TransitionResource(dstBufferD3D.GetResource(), D3D12_RESOURCE_STATE_COPY_DEST);
     commandContext_.TransitionResource(srcBufferD3D.GetResource(), D3D12_RESOURCE_STATE_COPY_SOURCE, true);
     {
-        commandList_->CopyBufferRegion(dstBufferD3D.GetNative(), dstOffset, srcBufferD3D.GetNative(), srcOffset, size);
+        GetNative()->CopyBufferRegion(dstBufferD3D.GetNative(), dstOffset, srcBufferD3D.GetNative(), srcOffset, size);
     }
     commandContext_.TransitionResource(dstBufferD3D.GetResource(), dstBufferD3D.GetResource().usageState);
     commandContext_.TransitionResource(srcBufferD3D.GetResource(), srcBufferD3D.GetResource().usageState, true);
@@ -167,7 +156,7 @@ void D3D12CommandBuffer::CopyBufferFromTexture(
 
             /* Copy entire region from source texture into intermediate buffer */
             const D3D12_TEXTURE_COPY_LOCATION dstLocationD3D = srcTextureD3D.CalcCopyLocation(alignedBuffer, 0, srcExtent, alignedRowStride);
-            commandList_->CopyTextureRegion(
+            GetNative()->CopyTextureRegion(
                 &dstLocationD3D,    // pDst
                 0,                  // DstX
                 0,                  // DstY
@@ -184,7 +173,7 @@ void D3D12CommandBuffer::CopyBufferFromTexture(
             {
                 for_range(y, srcExtent.y)
                 {
-                    commandList_->CopyBufferRegion(dstBufferD3D.GetNative(), dstOffset, alignedBuffer, alignedOffset, rowStride);
+                    GetNative()->CopyBufferRegion(dstBufferD3D.GetNative(), dstOffset, alignedBuffer, alignedOffset, rowStride);
                     alignedOffset += alignedRowStride;
                     dstOffset += rowStride;
                 }
@@ -196,7 +185,7 @@ void D3D12CommandBuffer::CopyBufferFromTexture(
         {
             /* Copy entire region from source texture into destination buffer */
             const D3D12_TEXTURE_COPY_LOCATION dstLocationD3D = srcTextureD3D.CalcCopyLocation(dstBufferD3D.GetNative(), dstOffset, srcExtent, alignedRowStride);
-            commandList_->CopyTextureRegion(
+            GetNative()->CopyTextureRegion(
                 &dstLocationD3D,    // pDst
                 0,                  // DstX
                 0,                  // DstY
@@ -250,7 +239,7 @@ void D3D12CommandBuffer::CopyTexture(
     commandContext_.TransitionResource(dstTextureD3D.GetResource(), D3D12_RESOURCE_STATE_COPY_DEST);
     commandContext_.TransitionResource(srcTextureD3D.GetResource(), D3D12_RESOURCE_STATE_COPY_SOURCE, true);
     {
-        commandList_->CopyTextureRegion(
+        GetNative()->CopyTextureRegion(
             &dstLocationD3D,                            // pDst
             static_cast<UINT>(dstLocation.offset.x),    // DstX
             static_cast<UINT>(dstLocation.offset.y),    // DstY
@@ -305,7 +294,7 @@ void D3D12CommandBuffer::CopyTextureFromBuffer(
             {
                 for_range(y, dstExtent.y)
                 {
-                    commandList_->CopyBufferRegion(alignedBuffer, alignedOffset, srcBufferD3D.GetNative(), srcOffset, rowStride);
+                    GetNative()->CopyBufferRegion(alignedBuffer, alignedOffset, srcBufferD3D.GetNative(), srcOffset, rowStride);
                     alignedOffset += alignedRowStride;
                     srcOffset += rowStride;
                 }
@@ -315,7 +304,7 @@ void D3D12CommandBuffer::CopyTextureFromBuffer(
 
             /* Copy entire region from intermediate buffer into destination texture */
             const D3D12_TEXTURE_COPY_LOCATION srcLocationD3D = dstTextureD3D.CalcCopyLocation(alignedBuffer, 0, dstExtent, alignedRowStride);
-            commandList_->CopyTextureRegion(
+            GetNative()->CopyTextureRegion(
                 &dstLocationD3D,                        // pDst
                 static_cast<UINT>(dstRegion.offset.x),  // DstX
                 static_cast<UINT>(dstRegion.offset.y),  // DstY
@@ -330,7 +319,7 @@ void D3D12CommandBuffer::CopyTextureFromBuffer(
         {
             /* Copy entire region from source buffer into destination texture */
             const D3D12_TEXTURE_COPY_LOCATION srcLocationD3D = dstTextureD3D.CalcCopyLocation(srcBufferD3D.GetNative(), srcOffset, dstExtent, alignedRowStride);
-            commandList_->CopyTextureRegion(
+            GetNative()->CopyTextureRegion(
                 &dstLocationD3D,                        // pDst
                 static_cast<UINT>(dstRegion.offset.x),  // DstX
                 static_cast<UINT>(dstRegion.offset.y),  // DstY
@@ -458,7 +447,7 @@ void D3D12CommandBuffer::Clear(long flags, const ClearValue& clearValue)
             D3D12_CPU_DESCRIPTOR_HANDLE rtvDescHandle = rtvDescHandle_;
             for_range(i, numColorBuffers_)
             {
-                commandList_->ClearRenderTargetView(rtvDescHandle, clearValue.color, 0, nullptr);
+                GetNative()->ClearRenderTargetView(rtvDescHandle, clearValue.color, 0, nullptr);
                 rtvDescHandle.ptr += rtvDescSize_;
             }
         }
@@ -469,7 +458,7 @@ void D3D12CommandBuffer::Clear(long flags, const ClearValue& clearValue)
         /* Clear depth-stencil buffer */
         if (D3D12_CLEAR_FLAGS clearFlagsDSV = GetClearFlagsDSV(flags))
         {
-            commandList_->ClearDepthStencilView(
+            GetNative()->ClearDepthStencilView(
                 dsvDescHandle_,
                 clearFlagsDSV,
                 clearValue.depth,
@@ -494,7 +483,7 @@ void D3D12CommandBuffer::ClearAttachments(std::uint32_t numAttachments, const At
             {
                 D3D12_CPU_DESCRIPTOR_HANDLE rtvDescHandle = rtvDescHandle_;
                 rtvDescHandle.ptr += (rtvDescSize_ * clearOp.colorAttachment);
-                commandList_->ClearRenderTargetView(rtvDescHandle, clearOp.clearValue.color, 0, nullptr);
+                GetNative()->ClearRenderTargetView(rtvDescHandle, clearOp.clearValue.color, 0, nullptr);
             }
         }
 
@@ -503,7 +492,7 @@ void D3D12CommandBuffer::ClearAttachments(std::uint32_t numAttachments, const At
             /* Clear depth-stencil buffer */
             if (D3D12_CLEAR_FLAGS clearFlagsDSV = GetClearFlagsDSV(clearOp.flags))
             {
-                commandList_->ClearDepthStencilView(
+                GetNative()->ClearDepthStencilView(
                     dsvDescHandle_,
                     clearFlagsDSV,
                     clearOp.clearValue.depth,
@@ -521,13 +510,13 @@ void D3D12CommandBuffer::ClearAttachments(std::uint32_t numAttachments, const At
 void D3D12CommandBuffer::SetVertexBuffer(Buffer& buffer)
 {
     auto& bufferD3D = LLGL_CAST(D3D12Buffer&, buffer);
-    commandList_->IASetVertexBuffers(0, 1, &(bufferD3D.GetVertexBufferView()));
+    GetNative()->IASetVertexBuffers(0, 1, &(bufferD3D.GetVertexBufferView()));
 }
 
 void D3D12CommandBuffer::SetVertexBufferArray(BufferArray& bufferArray)
 {
     auto& bufferArrayD3D = LLGL_CAST(D3D12BufferArray&, bufferArray);
-    commandList_->IASetVertexBuffers(
+    GetNative()->IASetVertexBuffers(
         0,
         static_cast<UINT>(bufferArrayD3D.GetVertexBufferViews().size()),
         bufferArrayD3D.GetVertexBufferViews().data()
@@ -580,14 +569,14 @@ void D3D12CommandBuffer::SetResourceHeap(ResourceHeap& resourceHeap, std::uint32
             /* Bind descriptor table to root parameter */
             const UINT rootParamIndex = boundPipelineLayout_->GetRootParameterIndices().rootParamDescriptorHeaps[i];
             if (boundPipelineState_->IsGraphicsPSO())
-                commandList_->SetGraphicsRootDescriptorTable(rootParamIndex, gpuDescHandle);
+                GetNative()->SetGraphicsRootDescriptorTable(rootParamIndex, gpuDescHandle);
             else
-                commandList_->SetComputeRootDescriptorTable(rootParamIndex, gpuDescHandle);
+                GetNative()->SetComputeRootDescriptorTable(rootParamIndex, gpuDescHandle);
         }
     }
 
     /* Insert resource barriers for the specified descriptor set */
-    resourceHeapD3D.InsertResourceBarriers(commandList_, descriptorSet);
+    resourceHeapD3D.InsertResourceBarriers(GetNative(), descriptorSet);
 }
 
 /*
@@ -632,18 +621,6 @@ void D3D12CommandBuffer::SetResource(std::uint32_t descriptor, Resource& resourc
         const D3D12DescriptorHeapLocation& descriptorLocation = boundPipelineLayout_->GetDescriptorMap()[descriptor];
         commandContext_.EmplaceDescriptorForStaging(resource, descriptorLocation.index, descriptorLocation.type);
     }
-}
-
-void D3D12CommandBuffer::ResetResourceSlots(
-    const ResourceType  resourceType,
-    std::uint32_t       firstSlot,
-    std::uint32_t       numSlots,
-    long                bindFlags,
-    long                stageFlags)
-{
-    //TODO
-    const D3D12_STREAM_OUTPUT_BUFFER_VIEW nullViews[1] = {};
-    commandList_->SOSetTargets(0, 1, nullViews);
 }
 
 /* ----- Render Passes ----- */
@@ -711,7 +688,7 @@ void D3D12CommandBuffer::SetPipelineState(PipelineState& pipelineState)
         }
         else
         {
-            if (commandList_->GetType() == D3D12_COMMAND_LIST_TYPE_DIRECT)
+            if (GetNative()->GetType() == D3D12_COMMAND_LIST_TYPE_DIRECT)
                 SetDefaultScissorRects(graphicsPSO.NumDefaultScissorRects());
         }
     }
@@ -738,12 +715,12 @@ void D3D12CommandBuffer::SetPipelineState(PipelineState& pipelineState)
 
 void D3D12CommandBuffer::SetBlendFactor(const float color[4])
 {
-    commandList_->OMSetBlendFactor(color);
+    GetNative()->OMSetBlendFactor(color);
 }
 
 void D3D12CommandBuffer::SetStencilReference(std::uint32_t reference, const StencilFace /*stencilFace*/)
 {
-    commandList_->OMSetStencilRef(reference);
+    GetNative()->OMSetStencilRef(reference);
 }
 
 void D3D12CommandBuffer::SetUniforms(std::uint32_t first, const void* data, std::uint16_t dataSize)
@@ -785,13 +762,13 @@ void D3D12CommandBuffer::SetUniforms(std::uint32_t first, const void* data, std:
 void D3D12CommandBuffer::BeginQuery(QueryHeap& queryHeap, std::uint32_t query)
 {
     auto& queryHeapD3D = LLGL_CAST(D3D12QueryHeap&, queryHeap);
-    queryHeapD3D.Begin(commandList_, query);
+    queryHeapD3D.Begin(GetNative(), query);
 }
 
 void D3D12CommandBuffer::EndQuery(QueryHeap& queryHeap, std::uint32_t query)
 {
     auto& queryHeapD3D = LLGL_CAST(D3D12QueryHeap&, queryHeap);
-    queryHeapD3D.End(commandList_, query);
+    queryHeapD3D.End(GetNative(), query);
 }
 
 static D3D12_PREDICATION_OP GetDXPredicateOp(const RenderConditionMode mode)
@@ -808,10 +785,10 @@ void D3D12CommandBuffer::BeginRenderCondition(QueryHeap& queryHeap, std::uint32_
 
     /* Flush query result data if it was marked as dirty */
     if (queryHeapD3D.InsideDirtyRange(query, 1))
-        queryHeapD3D.FlushDirtyRange(commandList_);
+        queryHeapD3D.FlushDirtyRange(GetNative());
 
     /* Set specified query as predicate */
-    commandList_->SetPredication(
+    GetNative()->SetPredication(
         queryHeapD3D.GetResultResource(),
         queryHeapD3D.GetAlignedBufferOffest(query),
         GetDXPredicateOp(mode)
@@ -820,7 +797,7 @@ void D3D12CommandBuffer::BeginRenderCondition(QueryHeap& queryHeap, std::uint32_
 
 void D3D12CommandBuffer::EndRenderCondition()
 {
-    commandList_->SetPredication(nullptr, 0, D3D12_PREDICATION_OP_EQUAL_ZERO);
+    GetNative()->SetPredication(nullptr, 0, D3D12_PREDICATION_OP_EQUAL_ZERO);
 }
 
 /* ----- Stream Output ------ */
@@ -846,7 +823,7 @@ void D3D12CommandBuffer::BeginStreamOutput(std::uint32_t numBuffers, Buffer* con
 
     for_range(i, numSOBuffers_)
     {
-        commandList_->CopyBufferRegion(
+        GetNative()->CopyBufferRegion(
             boundSOBuffers_[i]->GetNative(),
             boundSOBuffers_[i]->GetBufferSize(),
             srcBufferView.resource,
@@ -861,14 +838,14 @@ void D3D12CommandBuffer::BeginStreamOutput(std::uint32_t numBuffers, Buffer* con
     commandContext_.FlushResourceBarrieres();
 
     /* Set active stream-output targets */
-    commandList_->SOSetTargets(0, numSOBuffers_, soBufferViews);
+    GetNative()->SOSetTargets(0, numSOBuffers_, soBufferViews);
 }
 
 void D3D12CommandBuffer::EndStreamOutput()
 {
     /* Unbind SO targets */
     const D3D12_STREAM_OUTPUT_BUFFER_VIEW soBufferViewsNull[LLGL_MAX_NUM_SO_BUFFERS] = {};
-    commandList_->SOSetTargets(0, LLGL_MAX_NUM_SO_BUFFERS, soBufferViewsNull);
+    GetNative()->SOSetTargets(0, LLGL_MAX_NUM_SO_BUFFERS, soBufferViewsNull);
 
     /* Transition resources back to their common usage */
     for_range(i, numSOBuffers_)
@@ -987,12 +964,12 @@ void D3D12CommandBuffer::DispatchIndirect(Buffer& buffer, std::uint64_t offset)
 
 void D3D12CommandBuffer::PushDebugGroup(const char* name)
 {
-    PIXBeginEvent(commandList_, 0, name);
+    PIXBeginEvent(GetNative(), 0, name);
 }
 
 void D3D12CommandBuffer::PopDebugGroup()
 {
-    PIXEndEvent(commandList_);
+    PIXEndEvent(GetNative());
 }
 
 /* ----- Extensions ----- */
@@ -1007,7 +984,7 @@ bool D3D12CommandBuffer::GetNativeHandle(void* nativeHandle, std::size_t nativeH
     if (nativeHandle != nullptr && nativeHandleSize == sizeof(Direct3D12::CommandBufferNativeHandle))
     {
         auto* nativeHandleD3D = reinterpret_cast<Direct3D12::CommandBufferNativeHandle*>(nativeHandle);
-        nativeHandleD3D->commandList = commandList_;
+        nativeHandleD3D->commandList = GetNative();
         nativeHandleD3D->commandList->AddRef();
         return true;
     }
@@ -1033,7 +1010,6 @@ void D3D12CommandBuffer::CreateCommandContext(D3D12RenderSystem& renderSystem, c
 
     /* Create command context and store reference to command list */
     commandContext_.Create(device, GetD3DCommandListType(desc), desc.numNativeBuffers, desc.minStagingPoolSize, true);
-    commandList_ = commandContext_.GetCommandList();
 
     /* Store increment size for descriptor heaps */
     rtvDescSize_ = device.GetNative()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -1046,7 +1022,7 @@ void D3D12CommandBuffer::SetAndConvertViewports(std::uint32_t numViewports, cons
     if (IsCompatibleToD3DViewport())
     {
         /* Now it's safe to reinterpret cast the viewports into D3D viewports */
-        commandList_->RSSetViewports(numViewports, reinterpret_cast<const D3D12_VIEWPORT*>(viewports));
+        GetNative()->RSSetViewports(numViewports, reinterpret_cast<const D3D12_VIEWPORT*>(viewports));
     }
     else
     {
@@ -1066,7 +1042,7 @@ void D3D12CommandBuffer::SetAndConvertViewports(std::uint32_t numViewports, cons
             dst.MaxDepth   = src.maxDepth;
         }
 
-        commandList_->RSSetViewports(numViewports, viewportsD3D);
+        GetNative()->RSSetViewports(numViewports, viewportsD3D);
     }
 
     /* If scissor test is disabled, set scissor rectangles to default value alongside viewports */
@@ -1089,7 +1065,7 @@ void D3D12CommandBuffer::SetAndConvertScissorRects(std::uint32_t numScissors, co
         dst.bottom = src.y + src.height;
     }
 
-    commandList_->RSSetScissorRects(numScissors, scissorsD3D);
+    GetNative()->RSSetScissorRects(numScissors, scissorsD3D);
 
     /* Invalidate previously bound default scissor rectangles */
     numDefaultScissorRects_ = 0;
@@ -1119,7 +1095,7 @@ void D3D12CommandBuffer::SetDefaultScissorRects(UINT numScissorRects)
     if (numScissorRects > numDefaultScissorRects_)
     {
         /* Set scissor to maximum viewport boundary and store new number of scissor rectangles to avoid unnecessary updates */
-        commandList_->RSSetScissorRects(numScissorRects, g_maxViewportBoundsD3DArray);
+        GetNative()->RSSetScissorRects(numScissorRects, g_maxViewportBoundsD3DArray);
         numDefaultScissorRects_ = numScissorRects;
     }
 }
@@ -1136,9 +1112,9 @@ void D3D12CommandBuffer::BindRenderTarget(D3D12RenderTarget& renderTargetD3D)
     dsvDescHandle_ = renderTargetD3D.GetCPUDescriptorHandleForDSV();
 
     if (dsvDescHandle_.ptr != 0)
-        commandList_->OMSetRenderTargets(numColorBuffers_, &rtvDescHandle_, TRUE, &dsvDescHandle_);
+        GetNative()->OMSetRenderTargets(numColorBuffers_, &rtvDescHandle_, TRUE, &dsvDescHandle_);
     else
-        commandList_->OMSetRenderTargets(numColorBuffers_, &rtvDescHandle_, TRUE, nullptr);
+        GetNative()->OMSetRenderTargets(numColorBuffers_, &rtvDescHandle_, TRUE, nullptr);
 }
 
 void D3D12CommandBuffer::BindSwapChain(D3D12SwapChain& swapChainD3D, std::uint32_t swapBufferIndex)
@@ -1160,9 +1136,9 @@ void D3D12CommandBuffer::BindSwapChain(D3D12SwapChain& swapChainD3D, std::uint32
     dsvDescHandle_ = swapChainD3D.GetCPUDescriptorHandleForDSV();
 
     if (dsvDescHandle_.ptr != 0)
-        commandList_->OMSetRenderTargets(1, &rtvDescHandle_, FALSE, &dsvDescHandle_);
+        GetNative()->OMSetRenderTargets(1, &rtvDescHandle_, FALSE, &dsvDescHandle_);
     else
-        commandList_->OMSetRenderTargets(1, &rtvDescHandle_, FALSE, nullptr);
+        GetNative()->OMSetRenderTargets(1, &rtvDescHandle_, FALSE, nullptr);
 }
 
 std::uint32_t D3D12CommandBuffer::ClearAttachmentsWithRenderPass(
@@ -1221,7 +1197,7 @@ std::uint32_t D3D12CommandBuffer::ClearRenderTargetViews(
         if (targetIndex < numColorBuffers_)
         {
             rtvDescHandle.ptr = rtvDescHandle_.ptr + rtvDescSize_ * targetIndex;
-            commandList_->ClearRenderTargetView(rtvDescHandle, clearValues[clearValueIndex].color, numRects, rects);
+            GetNative()->ClearRenderTargetView(rtvDescHandle, clearValues[clearValueIndex].color, numRects, rects);
         }
 
         ++clearValueIndex;
@@ -1240,7 +1216,7 @@ std::uint32_t D3D12CommandBuffer::ClearRenderTargetViews(
         if (targetIndex < numColorBuffers_)
         {
             rtvDescHandle.ptr = rtvDescHandle_.ptr + rtvDescSize_ * targetIndex;
-            commandList_->ClearRenderTargetView(rtvDescHandle, defaultClearColor, numRects, rects);
+            GetNative()->ClearRenderTargetView(rtvDescHandle, defaultClearColor, numRects, rects);
         }
     }
 
@@ -1266,7 +1242,7 @@ void D3D12CommandBuffer::ClearDepthStencilView(
     }
 
     /* Clear depth-stencil view */
-    commandList_->ClearDepthStencilView(dsvDescHandle_, clearFlags, depth, stencil, numRects, rects);
+    GetNative()->ClearDepthStencilView(dsvDescHandle_, clearFlags, depth, stencil, numRects, rects);
 }
 
 void D3D12CommandBuffer::ResetBindingStates()

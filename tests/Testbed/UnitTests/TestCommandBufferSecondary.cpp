@@ -52,7 +52,7 @@ DEF_TEST( CommandBufferSecondary )
         psoDesc.depth.writeEnabled  = true;
         psoDesc.rasterizer.cullMode = CullMode::Back;
     }
-    PipelineState* pso = renderer->CreatePipelineState(psoDesc);
+    CREATE_GRAPHICS_PSO(pso, psoDesc, "psoSecondaryCmdBuf");
 
     // Create scene buffers:
     const ModelTransform transforms[numCmdBuffers] =
@@ -149,9 +149,9 @@ DEF_TEST( CommandBufferSecondary )
                 else
                     cmdBuffer->Execute(*secondaryCmdBuffers[i]);
             }
+            cmdBuffer->CopyTextureFromFramebuffer(*readbackTex, texRegion, Offset2D{});
         }
         cmdBuffer->EndRenderPass();
-        cmdBuffer->CopyTextureFromFramebuffer(*readbackTex, texRegion, Offset2D{});
     }
     cmdBuffer->End();
 

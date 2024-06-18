@@ -24,7 +24,7 @@
 #include "../Buffer/VKBuffer.h"
 #include "../Buffer/VKBufferArray.h"
 #include "../../CheckedCast.h"
-#include "../../../Core/Exception.h"
+#include "../../../Core/Assertion.h"
 #include <LLGL/Utils/ForRange.h>
 #include <LLGL/Constants.h>
 #include <LLGL/TypeInfo.h>
@@ -86,9 +86,7 @@ VKCommandBuffer::VKCommandBuffer(
                 usageFlags_ |= VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
             }
         }
-        if ((desc.flags & CommandBufferFlags::MultiSubmit) != 0)
-            multiSubmit_ = true;
-        else
+        if ((desc.flags & CommandBufferFlags::MultiSubmit) == 0)
             usageFlags_ |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     }
 
@@ -96,9 +94,6 @@ VKCommandBuffer::VKCommandBuffer(
     CreateVkCommandPool(queueFamilyIndices.graphicsFamily);
     CreateVkCommandBuffers();
     CreateVkRecordingFences();
-
-    /* Acquire first native command buffer */
-    AcquireNextBuffer();
 }
 
 VKCommandBuffer::~VKCommandBuffer()
@@ -108,9 +103,13 @@ VKCommandBuffer::~VKCommandBuffer()
 
 VkFence VKCommandBuffer::GetQueueSubmitFenceAndFlush()
 {
+    /*
+    Flush recoring fence since we don't have to signal it more than once,
+    until the same native command buffer is recorded again.
+    */
     VkFence fence = recordingFence_;
-    if (multiSubmit_)
-        recordingFence_ = VK_NULL_HANDLE;
+    recordingFence_ = VK_NULL_HANDLE;
+    recordingFenceDirty_[commandBufferIndex_] = true;
     return fence;
 }
 
@@ -121,15 +120,9 @@ void VKCommandBuffer::Begin()
     /* Use next internal VkCommandBuffer object to reduce latency */
     AcquireNextBuffer();
 
-    /* Wait for fence before recording */
-    vkWaitForFences(device_, 1, &recordingFence_, VK_TRUE, UINT64_MAX);
-    vkResetFences(device_, 1, &recordingFence_);
-
     /* Initialize inheritance if this is a secondary command buffer */
-    const bool isSecondaryCmdBuffer = (bufferLevel_ == VK_COMMAND_BUFFER_LEVEL_SECONDARY);
-
     VkCommandBufferInheritanceInfo inheritanceInfo;
-    if (isSecondaryCmdBuffer)
+    if (IsSecondaryCmdBuffer())
     {
         inheritanceInfo.sType                   = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
         inheritanceInfo.pNext                   = nullptr;
@@ -147,7 +140,7 @@ void VKCommandBuffer::Begin()
         beginInfo.sType             = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.pNext             = nullptr;
         beginInfo.flags             = usageFlags_;
-        beginInfo.pInheritanceInfo  = (isSecondaryCmdBuffer ? &inheritanceInfo : nullptr);
+        beginInfo.pInheritanceInfo  = (IsSecondaryCmdBuffer() ? &inheritanceInfo : nullptr);
     }
     VkResult result = vkBeginCommandBuffer(commandBuffer_, &beginInfo);
     VKThrowIfFailed(result, "failed to begin Vulkan command buffer");
@@ -178,16 +171,16 @@ void VKCommandBuffer::End()
     /* Execute command buffer right after encoding for immediate command buffers */
     if (IsImmediateCmdBuffer())
     {
-        VkResult result = VKSubmitCommandBuffer(commandQueue_, commandBuffer_, GetQueueSubmitFence());
+        VkResult result = VKSubmitCommandBuffer(commandQueue_, commandBuffer_, GetQueueSubmitFenceAndFlush());
         VKThrowIfFailed(result, "failed to submit command buffer to Vulkan graphics queue");
     }
 
     ResetBindingStates();
 }
 
-void VKCommandBuffer::Execute(CommandBuffer& deferredCommandBuffer)
+void VKCommandBuffer::Execute(CommandBuffer& secondaryCommandBuffer)
 {
-    auto& cmdBufferVK = LLGL_CAST(VKCommandBuffer&, deferredCommandBuffer);
+    auto& cmdBufferVK = LLGL_CAST(VKCommandBuffer&, secondaryCommandBuffer);
     VkCommandBuffer cmdBuffers[] = { cmdBufferVK.GetVkCommandBuffer() };
     vkCmdExecuteCommands(commandBuffer_, 1, cmdBuffers);
 }
@@ -578,16 +571,6 @@ void VKCommandBuffer::SetResource(std::uint32_t descriptor, Resource& resource)
     }
 }
 
-void VKCommandBuffer::ResetResourceSlots(
-    const ResourceType  /*resourceType*/,
-    std::uint32_t       /*firstSlot*/,
-    std::uint32_t       /*numSlots*/,
-    long                /*bindFlags*/,
-    long                /*stageFlags*/)
-{
-    // dummy
-}
-
 /* ----- Render Passes ----- */
 
 void VKCommandBuffer::BeginRenderPass(
@@ -597,6 +580,8 @@ void VKCommandBuffer::BeginRenderPass(
     const ClearValue*   clearValues,
     std::uint32_t       swapBufferIndex)
 {
+    LLGL_ASSERT(!IsSecondaryCmdBuffer());
+
     if (LLGL::IsInstanceOf<SwapChain>(renderTarget))
     {
         /* Get Vulkan swap-chain object */
@@ -641,6 +626,18 @@ void VKCommandBuffer::BeginRenderPass(
         ConvertRenderPassClearValues(*renderPassVK, numClearValuesVK, clearValuesVK, numClearValues, clearValues);
     }
 
+    /* Determine subpass contents */
+    subpassContents_ =
+    (
+        #ifdef VK_EXT_nested_command_buffer
+        HasExtension(VKExt::EXT_nested_command_buffer)
+            ? VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_EXT
+            : VK_SUBPASS_CONTENTS_INLINE
+        #else
+        VK_SUBPASS_CONTENTS_INLINE
+        #endif
+    );
+
     /* Record begin of render pass */
     VkRenderPassBeginInfo beginInfo;
     {
@@ -652,7 +649,7 @@ void VKCommandBuffer::BeginRenderPass(
         beginInfo.clearValueCount   = numClearValuesVK;
         beginInfo.pClearValues      = clearValuesVK;
     }
-    vkCmdBeginRenderPass(commandBuffer_, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(commandBuffer_, &beginInfo, subpassContents_);
 
     /* Store new record state */
     recordState_ = RecordState::InsideRenderPass;
@@ -660,6 +657,8 @@ void VKCommandBuffer::BeginRenderPass(
 
 void VKCommandBuffer::EndRenderPass()
 {
+    LLGL_ASSERT(renderPass_ != VK_NULL_HANDLE);
+
     /* Record and of render pass */
     vkCmdEndRenderPass(commandBuffer_);
 
@@ -1257,7 +1256,7 @@ void VKCommandBuffer::ResumeRenderPass()
         beginInfo.clearValueCount   = 0;
         beginInfo.pClearValues      = nullptr;
     }
-    vkCmdBeginRenderPass(commandBuffer_, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(commandBuffer_, &beginInfo, subpassContents_);
 }
 
 bool VKCommandBuffer::IsInsideRenderPass() const
@@ -1300,9 +1299,20 @@ void VKCommandBuffer::FlushDescriptorCache()
 
 void VKCommandBuffer::AcquireNextBuffer()
 {
+    /* Move to next command buffer index */
     commandBufferIndex_ = (commandBufferIndex_ + 1) % numCommandBuffers_;
+
+    /* Wait for fence before using next command buffer */
+    recordingFence_ = recordingFenceArray_[commandBufferIndex_].Get();
+    if (recordingFenceDirty_[commandBufferIndex_])
+        vkWaitForFences(device_, 1, &recordingFence_, VK_TRUE, UINT64_MAX);
+
+    /* Reset fence state after it has been signaled by the command queue */
+    vkResetFences(device_, 1, &recordingFence_);
+    recordingFenceDirty_[commandBufferIndex_] = false;
+
+    /* Make next command buffer current and reset pools and context */
     commandBuffer_      = commandBufferArray_[commandBufferIndex_];
-    recordingFence_     = recordingFenceArray_[commandBufferIndex_].Get();
     descriptorSetPool_  = &(descriptorSetPoolArray_[commandBufferIndex_]);
     descriptorSetPool_->Reset();
     context_.Reset(commandBuffer_);

@@ -137,8 +137,10 @@ public:
         particleBuffers[AttribNormal  ]->SetDebugName("Particles.Normal");
 
         // Show some information
-        std::cout << "press LEFT MOUSE BUTTON and move the mouse to rotate the camera" << std::endl;
-        std::cout << "press RIGHT MOUSE BUTTON and move the mouse on the X-axis to change the cloth stiffness" << std::endl;
+        LLGL::Log::Printf(
+            "press LEFT MOUSE BUTTON and move the mouse to rotate the camera\n"
+            "press RIGHT MOUSE BUTTON and move the mouse on the X-axis to change the cloth stiffness\n"
+        );
     }
 
     // Generates the grid geometry for the cloth with triangle strip topology
@@ -387,12 +389,13 @@ public:
                 "cbuffer(SceneState@0):comp,"
                 #ifdef ENABLE_STORAGE_TEXTURES
                 "texture(parBase@1):comp,"
-                "rwtexture(parCurrPos@2, parNextPos@3, parPrevPos@4, parVelocity@5, parNormal@6):comp"
+                "rwtexture(parCurrPos@2, parNextPos@3, parPrevPos@4, parVelocity@5, parNormal@6):comp,"
                 #else
                 "buffer(parBase@1):comp,"
-                "rwbuffer(parCurrPos@2, parNextPos@3, parPrevPos@4, parVelocity@5, parNormal@6):comp"
-                "}"
+                "rwbuffer(parCurrPos@2, parNextPos@3, parPrevPos@4, parVelocity@5, parNormal@6):comp,"
+                "},"
                 #endif // /ENABLE_STORAGE_TEXTURES
+                "barriers{rwbuffer},"
             )
         );
 
@@ -419,7 +422,6 @@ public:
         {
             resourceHeapDesc.pipelineLayout     = computeLayout;
             resourceHeapDesc.numResourceViews   = sizeof(resourceViewsCompute) / sizeof(resourceViewsCompute[0]);
-            resourceHeapDesc.barrierFlags       = LLGL::BarrierFlags::StorageBuffer;
         }
         computeResourceHeap = renderer->CreateResourceHeap(resourceHeapDesc, resourceViewsCompute);
 
@@ -471,16 +473,16 @@ public:
 
         graphicsLayout = renderer->CreatePipelineLayout(
             IsMetal() || IsVulkan()
-                ? LLGL::Parse("heap{cbuffer(SceneState@3):vert:frag, texture(colorMap@4):frag, sampler(linearSampler@5):frag, texture(1,2,6):vert}")
-                : LLGL::Parse("heap{cbuffer(SceneState@0):vert:frag, texture(colorMap@0):frag, sampler(linearSampler@0):frag, texture(1,2,3):vert}")
+                ? LLGL::Parse("heap{cbuffer(SceneState@3):vert:frag, texture(colorMap@4):frag, sampler(linearSampler@5):frag, texture(1,2,6):vert}, barriers{rwtexture}")
+                : LLGL::Parse("heap{cbuffer(SceneState@0):vert:frag, texture(colorMap@0):frag, sampler(linearSampler@0):frag, texture(1,2,3):vert}, barriers{rwtexture}")
         );
 
         #else
 
         graphicsLayout = renderer->CreatePipelineLayout(
             IsMetal() || IsVulkan()
-                ? LLGL::Parse("heap{cbuffer(SceneState@3):vert:frag, texture(colorMap@4):frag, sampler(linearSampler@5):frag}")
-                : LLGL::Parse("heap{cbuffer(SceneState@0):vert:frag, texture(colorMap@0):frag, sampler(linearSampler@0):frag}")
+                ? LLGL::Parse("heap{cbuffer(SceneState@3):vert:frag, texture(colorMap@4):frag, sampler(linearSampler@5):frag},")
+                : LLGL::Parse("heap{cbuffer(SceneState@0):vert:frag, texture(colorMap@0):frag, sampler(linearSampler@0):frag},")
         );
 
         #endif // /ENABLE_STORAGE_TEXTURES
@@ -518,9 +520,6 @@ public:
         {
             resourceHeapDesc.pipelineLayout     = graphicsLayout;
             resourceHeapDesc.numResourceViews   = sizeof(resourceViewsGraphics) / sizeof(resourceViewsGraphics[0]);
-            #ifdef ENABLE_STORAGE_TEXTURES
-            resourceHeapDesc.barrierFlags       = LLGL::BarrierFlags::StorageTexture;
-            #endif
         }
         graphicsResourceHeap = renderer->CreateResourceHeap(resourceHeapDesc, resourceViewsGraphics);
     }
@@ -543,8 +542,8 @@ private:
         {
             float delta = motion.x*0.01f;
             stiffnessFactor = std::max(0.5f, std::min(stiffnessFactor + delta, 1.0f));
-            std::cout << "stiffness: " << static_cast<int>(stiffnessFactor * 100.0f) << "%    \r";
-            std::flush(std::cout);
+            LLGL::Log::Printf("stiffness: %d\%    \r", static_cast<int>(stiffnessFactor * 100.0f));
+            ::fflush(stdout);
         }
 
         // Update timer
@@ -611,18 +610,6 @@ private:
             }
             commands->PopDebugGroup();
 
-            #ifdef ENABLE_STORAGE_TEXTURES
-            commands->ResetResourceSlots(LLGL::ResourceType::Texture, 2, 5, LLGL::BindFlags::Storage, LLGL::StageFlags::ComputeStage);
-            #else
-            commands->ResetResourceSlots(LLGL::ResourceType::Buffer, 4, 3, LLGL::BindFlags::Storage, LLGL::StageFlags::ComputeStage);
-            #endif
-        }
-        commands->End();
-        commandQueue->Submit(*commands);
-
-        // Record and submit graphics commands
-        commands->Begin();
-        {
             // Draw scene
             commands->BeginRenderPass(*swapChain);
             {
@@ -643,12 +630,6 @@ private:
                 commands->SetPipelineState(*graphicsPipeline);
                 commands->SetResourceHeap(*graphicsResourceHeap);
                 commands->DrawIndexed(numClothIndices, 0);
-
-                #ifdef ENABLE_STORAGE_TEXTURES
-                commands->ResetResourceSlots(LLGL::ResourceType::Texture, 1, 3, LLGL::BindFlags::Sampled, LLGL::StageFlags::VertexStage);
-                #else
-                commands->ResetResourceSlots(LLGL::ResourceType::Buffer, 0, 2, LLGL::BindFlags::VertexBuffer, LLGL::StageFlags::VertexStage);
-                #endif
             }
             commands->EndRenderPass();
         }

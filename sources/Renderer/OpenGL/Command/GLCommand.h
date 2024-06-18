@@ -430,24 +430,9 @@ struct GLCmdBindGL2XSampler
 };
 #endif
 
-struct GLCmdUnbindResources
+struct GLCmdMemoryBarrier
 {
-    struct ResetFlags
-    {
-        enum
-        {
-            UBO                 = (1 << 0),
-            SSBO                = (1 << 1),
-            TransformFeedback   = (1 << 2),
-            Textures            = (1 << 3),
-            Images              = (1 << 4),
-            Samplers            = (1 << 5),
-        };
-    };
-
-    GLuint      first;
-    GLsizei     count;
-    GLbitfield  resetFlags;
+    GLbitfield barriers;
 };
 
 struct GLCmdPushDebugGroup

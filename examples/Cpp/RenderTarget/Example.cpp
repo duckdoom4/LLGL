@@ -101,9 +101,11 @@ public:
         #endif
 
         // Show some information
-        std::cout << "press LEFT MOUSE BUTTON and move the mouse on the X-axis to rotate the OUTER cube" << std::endl;
-        std::cout << "press RIGHT MOUSE BUTTON and move the mouse on the X-axis to rotate the INNER cube" << std::endl;
-        std::cout << "press RETURN KEY to save the render target texture to a PNG file" << std::endl;
+        LLGL::Log::Printf(
+            "press LEFT MOUSE BUTTON and move the mouse on the X-axis to rotate the OUTER cube\n"
+            "press RIGHT MOUSE BUTTON and move the mouse on the X-axis to rotate the INNER cube\n"
+            "press RETURN KEY to save the render target texture to a PNG file\n"
+        );
     }
 
 private:
@@ -438,10 +440,6 @@ private:
 
         #endif // /ENABLE_CBUFFER_RANGE
 
-        #ifdef ENABLE_CUSTOM_MULTISAMPLING
-        commands->ResetResourceSlots(LLGL::ResourceType::Texture, 3, 1, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage);
-        #endif
-
         // Begin render pass for render target
         commands->BeginRenderPass(*renderTarget);
         {
@@ -492,10 +490,6 @@ private:
 
         // Generate MIP-maps again after texture has been written by the render-target
         commands->GenerateMips(*renderTargetTex);
-
-        #ifdef ENABLE_CUSTOM_MULTISAMPLING
-        commands->ResetResourceSlots(LLGL::ResourceType::Texture, 3, 1, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage);
-        #endif
 
         // Begin render pass for swap-chain
         commands->BeginRenderPass(*swapChain);

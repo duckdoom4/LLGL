@@ -71,8 +71,10 @@ public:
         CreateResourceHeaps();
 
         // Show some information
-        std::cout << "press LEFT MOUSE BUTTON and move the mouse to ROTATE the model" << std::endl;
-        std::cout << "press RIGHT MOUSE BUTTON and move the mouse on the X-axis to change the DENSITY THRESHOLD" << std::endl;
+        LLGL::Log::Printf(
+            "press LEFT MOUSE BUTTON and move the mouse to ROTATE the model\n"
+            "press RIGHT MOUSE BUTTON and move the mouse on the X-axis to change the DENSITY THRESHOLD\n"
+        );
     }
 
 private:
@@ -198,7 +200,7 @@ private:
 
     void CreatePipelineLayouts()
     {
-        // Create pipeline layout with only a single constnat buffer for depth-range pass and Z-pre pass
+        // Create pipeline layout with only a single constant buffer for depth-range pass and Z-pre pass
         pipelineLayoutCbuffer = renderer->CreatePipelineLayout(LLGL::Parse("heap{ cbuffer(Settings@1):frag:vert }"));
 
         // Create pipeline layout for final scene rendering
@@ -222,15 +224,15 @@ private:
         {
             LLGL::GraphicsPipelineDescriptor pipelineDesc;
             {
-                pipelineDesc.vertexShader               = vsScene;
-                pipelineDesc.renderPass                 = depthRangeRenderTarget->GetRenderPass();
-                pipelineDesc.pipelineLayout             = pipelineLayoutCbuffer;
-                pipelineDesc.depth.testEnabled          = true;
-                pipelineDesc.depth.writeEnabled         = true;
-                pipelineDesc.depth.compareOp            = LLGL::CompareOp::Greater;
-                pipelineDesc.rasterizer.cullMode        = LLGL::CullMode::Front;
-                //pipelineDesc.rasterizer.multiSampling   = GetMultiSampleDesc();
-                pipelineDesc.blend.targets[0].colorMask = 0x0;
+                pipelineDesc.vertexShader                   = vsScene;
+                pipelineDesc.renderPass                     = depthRangeRenderTarget->GetRenderPass();
+                pipelineDesc.pipelineLayout                 = pipelineLayoutCbuffer;
+                pipelineDesc.depth.testEnabled              = true;
+                pipelineDesc.depth.writeEnabled             = true;
+                pipelineDesc.depth.compareOp                = LLGL::CompareOp::Greater;
+                pipelineDesc.rasterizer.cullMode            = LLGL::CullMode::Front;
+                pipelineDesc.rasterizer.multiSampleEnabled  = (depthRangeRenderTarget->GetSamples() > 1);
+                pipelineDesc.blend.targets[0].colorMask     = 0x0;
             }
             pipelineRangePass = renderer->CreatePipelineState(pipelineDesc);
         }
@@ -239,15 +241,15 @@ private:
         {
             LLGL::GraphicsPipelineDescriptor pipelineDesc;
             {
-                pipelineDesc.vertexShader               = vsScene;
-                pipelineDesc.renderPass                 = swapChain->GetRenderPass();
-                pipelineDesc.pipelineLayout             = pipelineLayoutCbuffer;
-                pipelineDesc.depth.testEnabled          = true;
-                pipelineDesc.depth.writeEnabled         = true;
-                pipelineDesc.depth.compareOp            = LLGL::CompareOp::Less;
-                pipelineDesc.rasterizer.cullMode        = LLGL::CullMode::Back;
-                //pipelineDesc.rasterizer.multiSampling   = GetMultiSampleDesc();
-                pipelineDesc.blend.targets[0].colorMask = 0x0;
+                pipelineDesc.vertexShader                   = vsScene;
+                pipelineDesc.renderPass                     = swapChain->GetRenderPass();
+                pipelineDesc.pipelineLayout                 = pipelineLayoutCbuffer;
+                pipelineDesc.depth.testEnabled              = true;
+                pipelineDesc.depth.writeEnabled             = true;
+                pipelineDesc.depth.compareOp                = LLGL::CompareOp::Less;
+                pipelineDesc.rasterizer.cullMode            = LLGL::CullMode::Back;
+                pipelineDesc.rasterizer.multiSampleEnabled  = (swapChain->GetSamples() > 1);
+                pipelineDesc.blend.targets[0].colorMask     = 0x0;
             }
             pipelineZPrePass = renderer->CreatePipelineState(pipelineDesc);
         }
@@ -256,22 +258,22 @@ private:
         {
             LLGL::GraphicsPipelineDescriptor pipelineDesc;
             {
-                pipelineDesc.vertexShader               = vsScene;
-                pipelineDesc.fragmentShader             = fsScene;
-                pipelineDesc.renderPass                 = swapChain->GetRenderPass();
-                pipelineDesc.pipelineLayout             = pipelineLayoutFinalPass;
-                pipelineDesc.depth.testEnabled          = true;
-                pipelineDesc.depth.writeEnabled         = false;
-                pipelineDesc.depth.compareOp            = LLGL::CompareOp::Equal;
-                pipelineDesc.rasterizer.cullMode        = LLGL::CullMode::Back;
-                //pipelineDesc.rasterizer.multiSampling   = GetMultiSampleDesc();
+                pipelineDesc.vertexShader                   = vsScene;
+                pipelineDesc.fragmentShader                 = fsScene;
+                pipelineDesc.renderPass                     = swapChain->GetRenderPass();
+                pipelineDesc.pipelineLayout                 = pipelineLayoutFinalPass;
+                pipelineDesc.depth.testEnabled              = true;
+                pipelineDesc.depth.writeEnabled             = false;
+                pipelineDesc.depth.compareOp                = LLGL::CompareOp::Equal;
+                pipelineDesc.rasterizer.cullMode            = LLGL::CullMode::Back;
+                pipelineDesc.rasterizer.multiSampleEnabled  = (swapChain->GetSamples() > 1);
 
                 auto& blendTarget = pipelineDesc.blend.targets[0];
-                blendTarget.blendEnabled                = true;
-                blendTarget.dstAlpha                    = LLGL::BlendOp::One;
-                blendTarget.srcAlpha                    = LLGL::BlendOp::SrcAlpha;
-                blendTarget.dstColor                    = LLGL::BlendOp::One;
-                blendTarget.srcColor                    = LLGL::BlendOp::SrcAlpha;
+                blendTarget.blendEnabled                    = true;
+                blendTarget.dstAlpha                        = LLGL::BlendOp::One;
+                blendTarget.srcAlpha                        = LLGL::BlendOp::SrcAlpha;
+                blendTarget.dstColor                        = LLGL::BlendOp::One;
+                blendTarget.srcColor                        = LLGL::BlendOp::SrcAlpha;
             }
             pipelineFinalPass = renderer->CreatePipelineState(pipelineDesc);
         }
@@ -317,8 +319,11 @@ private:
         {
             float delta = mouseMotion.x*0.002f;
             settings.threshold = std::max(0.0f, std::min(settings.threshold + delta, 0.5f));
-            std::cout << "density threshold: " << static_cast<int>(settings.threshold*200.0f) << "%    \r";
-            std::flush(std::cout);
+            LLGL::Log::Printf(
+                "density threshold: %d\%    \r",
+                static_cast<int>(settings.threshold*200.0f)
+            );
+            ::fflush(stdout);
         }
 
         // Rotate model around X and Y axes
@@ -376,8 +381,6 @@ private:
             }
             commands->EndRenderPass();
 
-            commands->ResetResourceSlots(LLGL::ResourceType::Texture, 3, 1, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage);
-
             // Render everything directly into the swap-chain
             commands->BeginRenderPass(*swapChain);
             {
@@ -403,8 +406,6 @@ private:
                 commands->PopDebugGroup();
             }
             commands->EndRenderPass();
-
-            commands->ResetResourceSlots(LLGL::ResourceType::Texture, 3, 1, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage);
         }
         commands->End();
         commandQueue->Submit(*commands);

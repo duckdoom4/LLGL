@@ -77,14 +77,16 @@ class LLGL_EXPORT CommandBuffer : public RenderSystemChild
         virtual void End() = 0;
 
         /**
-        \brief Executes the specified deferred command buffer.
-        \param[in] deferredCommandBuffer Specifies the deferred command buffer which is meant to be executed.
-        This command buffer must have been created with the CommandBufferFlags::Secondary flag.
-        \remarks This function can only be used by primary command buffers, i.e. command buffers that have not been created with the flag CommandBufferFlags::Secondary.
+        \brief Executes the specified secondary command buffer by inlining its commands into this command buffer.
+        \param[in] secondaryCommandBuffer Specifies the secondary command buffer which is meant to be inlined.
+        This command buffer must have been created with the CommandBufferFlags::Secondary flag and its must also have finished encoding.
+        \remarks This function can only be used by primary command buffers, i.e. command buffers that have \e not been created with the flag CommandBufferFlags::Secondary.
+        \remarks Once this command buffer is submitted for execution to one or more primary command buffers,
+        it <b>must not</b> be updated unless all of such primary command buffers are also updated before their next submission to the command queue.
         \see CommandBufferFlags
         \todo Incomplete for: D3D12, Vulkan, Metal.
         */
-        virtual void Execute(CommandBuffer& deferredCommandBuffer) = 0;
+        virtual void Execute(CommandBuffer& secondaryCommandBuffer) = 0;
 
         /* ----- Blitting ----- */
 
@@ -301,6 +303,8 @@ class LLGL_EXPORT CommandBuffer : public RenderSystemChild
         \param[in] srcOffset Specifies the source offset at which the framebuffer is to be read from.
         If the source offset plus the destination dimension is larger the framebuffer's resolution, the behavior is undefined.
 
+        \remarks This command must only be used inside a render pass.
+
         \remarks For performance reasons, it is recommended to render a scene into a RenderTarget instead of copying the framebuffer into a texture.
         This command merely simplifies the process of capturing the framebuffer mid-scene without having to interrupt a render pass or creating an intermediate render target.
 
@@ -456,37 +460,15 @@ class LLGL_EXPORT CommandBuffer : public RenderSystemChild
         */
         virtual void SetResource(std::uint32_t descriptor, Resource& resource) = 0;
 
-        /**
-        \brief Resets the binding slots for the specified resources.
-
-        \param[in] resourceType Specifies the type of resources to unbind.
-
-        \param[in] firstSlot Specifies the first binding slot beginning with zero.
-        This must be zero for the following resource types: ResourceType::IndexBuffer, ResourceType::StreamOutputBuffer.
-
-        \param[in] numSlots Specifies the number of binding slots to reset. If this is zero, the function has no effect.
-
-        \param[in] bindFlags Specifies which kind of binding slots to reset.
-        This can be a bitwise OR combinations of the BindFlags entries.
-        To reset a vertex buffer slot for instance, it must contain the BindFlags::VertexBuffer flag.
-
-        \param[in] stageFlags Specifies which shader stages are affected.
-        This can be a bitwise OR combination of the StageFlags entries. By default StageFlags::AllStages.
-
-        \remarks This should be called when a resource is currently bound as shader output and will be bound as shader input for the next draw or compute commands.
-        \remarks If direct resource binding is not supported by the render system, this function has no effect.
-
-        \note Only supported with: OpenGL, Direct3D 11, Metal.
-        \see BindFlags
-        \see StageFlags
-        */
+        //! \deprecated Since 0.04b; No need to reset resource slots manually anymore!
+        LLGL_DEPRECATED("CommandBuffer::ResetResourceSlots is deprecated since 0.04b; No need to reset resource slots manually anymore!")
         virtual void ResetResourceSlots(
             const ResourceType  resourceType,
             std::uint32_t       firstSlot,
             std::uint32_t       numSlots,
             long                bindFlags,
             long                stageFlags      = StageFlags::AllStages
-        ) = 0;
+        );
 
         /* ----- Render Passes ----- */
 

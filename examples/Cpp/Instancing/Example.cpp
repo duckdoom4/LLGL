@@ -7,6 +7,7 @@
 
 #include <ExampleBase.h>
 #include <stb/stb_image.h>
+#include <FileUtils.h>
 #include <LLGL/Display.h>
 
 
@@ -27,7 +28,8 @@ class Example_Instancing : public ExampleBase
     LLGL::ResourceHeap*         resourceHeap        = nullptr;
 
     // Two vertex buffer, one for per-vertex data, one for per-instance data
-    LLGL::Buffer*               vertexBuffers[2]    = {};
+    LLGL::Buffer*               perVertexDataBuf    = nullptr;
+    LLGL::Buffer*               perInstanceDataBuf  = nullptr;
     LLGL::BufferArray*          vertexBufferArray   = nullptr;
 
     LLGL::Buffer*               constantBuffer      = nullptr;
@@ -72,9 +74,11 @@ public:
         resourceHeap->SetDebugName("ResourceHeap");
 
         // Show info
-        std::cout << "press LEFT/RIGHT MOUSE BUTTON to rotate the camera around the scene" << std::endl;
-        std::cout << "press R KEY to reload the shader program" << std::endl;
-        std::cout << "press SPACE KEY to switch between pipeline states with and without alpha-to-coverage" << std::endl;
+        LLGL::Log::Printf(
+            "press LEFT/RIGHT MOUSE BUTTON to rotate the camera around the scene\n"
+            "press R KEY to reload the shader program\n"
+            "press SPACE KEY to switch between pipeline states with and without alpha-to-coverage\n"
+        );
     }
 
 private:
@@ -175,24 +179,27 @@ private:
         grassPlane.arrayLayer = static_cast<float>(numPlantImages + 1);
 
         // Create buffer for per-vertex data
-        LLGL::BufferDescriptor desc;
+        LLGL::BufferDescriptor perVertexDataDesc;
         {
-            desc.debugName      = "Vertices";
-            desc.size           = sizeof(vertexData);
-            desc.bindFlags      = LLGL::BindFlags::VertexBuffer;
-            desc.vertexAttribs  = vertexFormatPerVertex.attributes;
+            perVertexDataDesc.debugName     = "Vertices";
+            perVertexDataDesc.size          = sizeof(vertexData);
+            perVertexDataDesc.bindFlags     = LLGL::BindFlags::VertexBuffer;
+            perVertexDataDesc.vertexAttribs = vertexFormatPerVertex.attributes;
         }
-        vertexBuffers[0] = renderer->CreateBuffer(desc, vertexData);
+        perVertexDataBuf = renderer->CreateBuffer(perVertexDataDesc, vertexData);
 
         // Create buffer for per-instance data
+        LLGL::BufferDescriptor perInstanceDataDesc;
         {
-            desc.debugName      = "Instances";
-            desc.size           = static_cast<std::uint32_t>(sizeof(Instance) * instanceData.size());
-            desc.vertexAttribs  = vertexFormatPerInstance.attributes;
+            perInstanceDataDesc.debugName       = "Instances";
+            perInstanceDataDesc.size            = static_cast<std::uint32_t>(sizeof(Instance) * instanceData.size());
+            perInstanceDataDesc.bindFlags       = LLGL::BindFlags::VertexBuffer;
+            perInstanceDataDesc.vertexAttribs   = vertexFormatPerInstance.attributes;
         }
-        vertexBuffers[1] = renderer->CreateBuffer(desc, instanceData.data());
+        perInstanceDataBuf = renderer->CreateBuffer(perInstanceDataDesc, instanceData.data());
 
         // Create vertex buffer array
+        LLGL::Buffer* vertexBuffers[2] = { perVertexDataBuf, perInstanceDataBuf };
         vertexBufferArray = renderer->CreateBufferArray(2, vertexBuffers);
 
         // Create constant buffer
@@ -220,6 +227,8 @@ private:
             else
                 filename = "Grass.jpg";
 
+            filename = FindResourcePath(filename);
+
             // Load all images from file (using STBI library, see https://github.com/nothings/stb)
             int w = 0, h = 0, c = 0;
             unsigned char* imageBuffer = stbi_load(filename.c_str(), &w, &h, &c, 4);
@@ -243,7 +252,7 @@ private:
             stbi_image_free(imageBuffer);
 
             // Show info
-            std::cout << "loaded texture: " << filename << std::endl;
+            LLGL::Log::Printf("loaded texture: %s\n", filename.c_str());
         }
 
         // Create array texture object with 'numImages' layers
@@ -368,9 +377,9 @@ private:
         {
             alphaToCoverageEnabled = !alphaToCoverageEnabled;
             if (alphaToCoverageEnabled)
-                std::cout << "Alpha-To-Coverage Enabled" << std::endl;
+                LLGL::Log::Printf("Alpha-To-Coverage Enabled\n");
             else
-                std::cout << "Alpha-To-Coverage Disabled" << std::endl;
+                LLGL::Log::Printf("Alpha-To-Coverage Disabled\n");
         }
 
         commands->Begin();

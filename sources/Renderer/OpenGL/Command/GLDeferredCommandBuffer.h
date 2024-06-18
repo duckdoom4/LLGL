@@ -103,10 +103,12 @@ class GLDeferredCommandBuffer final : public GLCommandBuffer
         void BindGL2XSampler(const GL2XSampler& samplerGL2X, std::uint32_t slot);
         #endif
 
-        /* Allocates only an opcode for empty commands */
+        void FlushMemoryBarriers();
+
+        // Allocates only an opcode for empty commands.
         void AllocOpcode(const GLOpcode opcode);
 
-        /* Allocates a new command and stores the specified opcode */
+        // Allocates a new command and stores the specified opcode.
         template <typename TCommand>
         TCommand* AllocCommand(const GLOpcode opcode, std::size_t payloadSize = 0);
 

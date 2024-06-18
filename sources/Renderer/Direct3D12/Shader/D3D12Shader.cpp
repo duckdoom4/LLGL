@@ -27,9 +27,9 @@ namespace LLGL
 {
 
 
-D3D12Shader::D3D12Shader(D3D12RenderSystem& renderSystem, const ShaderDescriptor& desc):
-    Shader{ desc.type },
-    renderSystem_{ renderSystem }
+D3D12Shader::D3D12Shader(D3D12RenderSystem& renderSystem, const ShaderDescriptor& desc) :
+    Shader        { desc.type    },
+    renderSystem_ { renderSystem }
 {
     if (BuildShader(desc))
     {
@@ -105,7 +105,7 @@ HRESULT D3D12Shader::ReflectAndCacheConstantBuffers(const std::vector<D3D12Const
     }
     if (cbufferReflectionResult_ == S_OK)
     {
-        /* Return cached constnat buffer reflections */
+        /* Return cached constant buffer reflections */
         if (outConstantBuffers != nullptr)
             *outConstantBuffers = &cbufferReflections_;
         return S_OK;
@@ -299,11 +299,11 @@ bool D3D12Shader::CompileSource(const ShaderDescriptor& shaderDesc)
         std::vector<LPCWSTR> compilerArgs = DXGetDxcCompilerArgs(flags);
 
         compilerArgs.push_back(L"-E");
-        const std::wstring entryWide = ToUTF16String(entry);
+        const std::wstring entryWide = ToWideString(entry);
         compilerArgs.push_back(entryWide.c_str());
 
         compilerArgs.push_back(L"-T");
-        const std::wstring targetWide = ToUTF16String(target);
+        const std::wstring targetWide = ToWideString(target);
         compilerArgs.push_back(targetWide.c_str());
 
         std::vector<std::wstring> definesWide;
@@ -312,11 +312,11 @@ bool D3D12Shader::CompileSource(const ShaderDescriptor& shaderDesc)
             /* Append macro definitions as compiler arguments "-D<NAME>" or "-D<NAME>=<VALUE>" */
             for (; defines->Name != nullptr; ++defines)
             {
-                std::wstring defineWide = std::wstring(L"-D") + ToUTF16String(defines->Name);
+                std::wstring defineWide = std::wstring(L"-D") + ToWideString(defines->Name);
                 if (defines->Definition != nullptr && defines->Definition[0] != '\0')
                 {
                     defineWide += L'=';
-                    defineWide += ToUTF16String(defines->Definition);
+                    defineWide += ToWideString(defines->Definition);
                 }
                 definesWide.push_back(std::move(defineWide));
             }
@@ -652,6 +652,9 @@ HRESULT D3D12Shader::ReflectShaderByteCode(ShaderReflection& reflection) const
         if (FAILED(hr))
             return hr;
     }
+    #else
+        if (FAILED(hr))
+            return hr;
     #endif // /LLGL_D3D12_ENABLE_DXCOMPILER
 
     D3D12_SHADER_DESC shaderDesc;
@@ -748,6 +751,7 @@ HRESULT D3D12Shader::ReflectConstantBuffers(std::vector<D3D12ConstantBufferRefle
             /* Write reflection output */
             D3D12ConstantBufferReflection cbufferInfo;
             {
+                cbufferInfo.stageFlags                      = GetStageFlags(this->GetType());
                 cbufferInfo.rootConstants.ShaderRegister    = inputBindDesc.BindPoint;
                 cbufferInfo.rootConstants.RegisterSpace     = inputBindDesc.Space;
                 cbufferInfo.rootConstants.Num32BitValues    = shaderBufferDesc.Size / 4;

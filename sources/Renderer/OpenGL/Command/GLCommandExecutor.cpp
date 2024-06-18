@@ -461,23 +461,14 @@ static std::size_t ExecuteGLCommand(const GLOpcode opcode, const void* pc, GLSta
             return sizeof(*cmd);
         }
         #endif
-        case GLOpcodeUnbindResources:
+        #ifdef LLGL_GLEXT_MEMORY_BARRIERS
+        case GLOpcodeMemoryBarrier:
         {
-            auto cmd = reinterpret_cast<const GLCmdUnbindResources*>(pc);
-            if ((cmd->resetFlags & GLCmdUnbindResources::ResetFlags::UBO) != 0)
-                stateMngr->UnbindBuffersBase(GLBufferTarget::UniformBuffer, cmd->first, cmd->count);
-            if ((cmd->resetFlags & GLCmdUnbindResources::ResetFlags::SSBO) != 0)
-                stateMngr->UnbindBuffersBase(GLBufferTarget::ShaderStorageBuffer, cmd->first, cmd->count);
-            if ((cmd->resetFlags & GLCmdUnbindResources::ResetFlags::TransformFeedback) != 0)
-                stateMngr->UnbindBuffersBase(GLBufferTarget::TransformFeedbackBuffer, cmd->first, cmd->count);
-            if ((cmd->resetFlags & GLCmdUnbindResources::ResetFlags::Textures) != 0)
-                stateMngr->UnbindTextures(cmd->first, cmd->count);
-            if ((cmd->resetFlags & GLCmdUnbindResources::ResetFlags::Images) != 0)
-                stateMngr->UnbindImageTextures(cmd->first, cmd->count);
-            if ((cmd->resetFlags & GLCmdUnbindResources::ResetFlags::Samplers) != 0)
-                stateMngr->UnbindSamplers(cmd->first, cmd->count);
+            auto cmd = reinterpret_cast<const GLCmdMemoryBarrier*>(pc);
+            glMemoryBarrier(cmd->barriers);
             return sizeof(*cmd);
         }
+        #endif
         case GLOpcodePushDebugGroup:
         {
             auto cmd = reinterpret_cast<const GLCmdPushDebugGroup*>(pc);

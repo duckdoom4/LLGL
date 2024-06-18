@@ -22,6 +22,9 @@
 #include <iomanip>
 #include <limits.h>
 
+#include "Command/D3D11PrimaryCommandBuffer.h"
+#include "Command/D3D11SecondaryCommandBuffer.h"
+
 #include "Buffer/D3D11Buffer.h"
 #include "Buffer/D3D11BufferArray.h"
 #include "Buffer/D3D11BufferWithRV.h"
@@ -74,6 +77,11 @@ D3D11RenderSystem::D3D11RenderSystem(const RenderSystemDescriptor& renderSystemD
         DXThrowIfFailed(hr, "failed to create D3D11 device");
     }
 
+    #if LLGL_D3D11_ENABLE_FEATURELEVEL >= 3
+    /* Query tearing feature support */
+    tearingSupported_ = CheckFactoryFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING);
+    #endif
+
     /* Initialize states and renderer information */
     CreateStateManagerAndCommandQueue();
     QueryRendererInfo();
@@ -119,7 +127,12 @@ CommandBuffer* D3D11RenderSystem::CreateCommandBuffer(const CommandBufferDescrip
     if ((commandBufferDesc.flags & (CommandBufferFlags::ImmediateSubmit)) != 0)
     {
         /* Create command buffer with immediate context */
-        return commandBuffers_.emplace<D3D11CommandBuffer>(device_.Get(), context_, stateMngr_, commandBufferDesc);
+        return commandBuffers_.emplace<D3D11PrimaryCommandBuffer>(device_.Get(), context_, stateMngr_, commandBufferDesc);
+    }
+    else if ((commandBufferDesc.flags & (CommandBufferFlags::Secondary)) != 0)
+    {
+        /* Create secondary command buffer with virtual buffer */
+        return commandBuffers_.emplace<D3D11SecondaryCommandBuffer>(commandBufferDesc);
     }
     else
     {
@@ -132,7 +145,7 @@ CommandBuffer* D3D11RenderSystem::CreateCommandBuffer(const CommandBufferDescrip
         std::shared_ptr<D3D11StateManager> deferredStateMngr = std::make_shared<D3D11StateManager>(device_.Get(), deferredContext);
 
         /* Create command buffer with deferred context and dedicated state manager */
-        return commandBuffers_.emplace<D3D11CommandBuffer>(device_.Get(), deferredContext, std::move(deferredStateMngr), commandBufferDesc);
+        return commandBuffers_.emplace<D3D11PrimaryCommandBuffer>(device_.Get(), deferredContext, std::move(deferredStateMngr), commandBufferDesc);
     }
 }
 
@@ -540,7 +553,13 @@ void D3D11RenderSystem::ClearStateForAllContexts()
 {
     stateMngr_->ClearState();
     for (const auto& cmdBuffer : commandBuffers_)
-        cmdBuffer->ClearStateAndResetDeferredCommandList();
+    {
+        if (!cmdBuffer->IsSecondaryCmdBuffer())
+        {
+            auto& primaryCmdBufferD3D = LLGL_CAST(D3D11PrimaryCommandBuffer&, *cmdBuffer);
+            primaryCmdBufferD3D.ClearStateAndResetDeferredCommandList();
+        }
+    }
 }
 
 
@@ -553,7 +572,7 @@ void D3D11RenderSystem::CreateFactory()
     /* Create DXGI factory */
     HRESULT hr = S_OK;
 
-#if LLGL_D3D11_ENABLE_FEATURELEVEL >= 2
+    #if LLGL_D3D11_ENABLE_FEATURELEVEL >= 2 || defined LLGL_OS_UWP
     hr = CreateDXGIFactory2(0, IID_PPV_ARGS(&factory2_));
     if (SUCCEEDED(hr))
     {
@@ -561,19 +580,25 @@ void D3D11RenderSystem::CreateFactory()
         factory2_.As(&factory1_);
         return;
     }
-#endif
+    #endif
 
-#if LLGL_D3D11_ENABLE_FEATURELEVEL >= 1
+    #ifdef LLGL_OS_UWP
+    DXThrowIfCreateFailed(hr, "IDXGIFactory2");
+    #endif
+
+    #if LLGL_D3D11_ENABLE_FEATURELEVEL >= 1
     hr = CreateDXGIFactory1(IID_PPV_ARGS(&factory1_));
     if (SUCCEEDED(hr))
     {
         factory1_.As(&factory_);
         return;
     }
-#endif
+    #endif
 
+    #ifdef LLGL_OS_WIN32
     hr = CreateDXGIFactory(IID_PPV_ARGS(&factory_));
     DXThrowIfCreateFailed(hr, "IDXGIFactory");
+    #endif
 }
 
 void D3D11RenderSystem::QueryVideoAdapters(long flags, ComPtr<IDXGIAdapter>& outPreferredAdatper)
@@ -692,10 +717,9 @@ void D3D11RenderSystem::QueryDXDeviceVersion()
 {
     LLGL_ASSERT_PTR(device_);
 
-    HRESULT hr = S_OK;
     /* Try to get an extended D3D11 device */
     #if LLGL_D3D11_ENABLE_FEATURELEVEL >= 3
-    hr = device_->QueryInterface(IID_PPV_ARGS(&device3_));
+    HRESULT hr = device_->QueryInterface(IID_PPV_ARGS(&device3_));
     if (FAILED(hr))
     #endif
     {
@@ -1062,6 +1086,25 @@ void D3D11RenderSystem::InitializeGpuTexture(
         }
     }
 }
+
+#if LLGL_D3D11_ENABLE_FEATURELEVEL >= 3
+
+bool D3D11RenderSystem::CheckFactoryFeatureSupport(DXGI_FEATURE feature) const
+{
+    ComPtr<IDXGIFactory5> factory5;
+    HRESULT hr = factory_->QueryInterface(IID_PPV_ARGS(&factory5));
+
+    if (SUCCEEDED(hr))
+    {
+        BOOL supported = FALSE;
+        hr = factory5->CheckFeatureSupport(feature, &supported, sizeof(supported));
+        return (SUCCEEDED(hr) && supported != FALSE);
+    }
+
+    return false;
+}
+
+#endif
 
 
 } // /namespace LLGL
